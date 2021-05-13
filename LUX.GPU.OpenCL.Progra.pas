@@ -6,7 +6,7 @@ uses System.SysUtils, System.Classes, System.Generics.Collections,
      cl_version, cl_platform, cl,
      LUX.Data.List,
      LUX.Code.C,
-     LUX.GPU.OpenCL.root,
+     LUX.GPU.OpenCL.core,
      LUX.GPU.OpenCL.Device,
      LUX.GPU.OpenCL.Kernel;
 
@@ -48,20 +48,27 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        _CompileLog    :String;
        _LinkStatus    :T_cl_build_status;
        _LinkLog       :String;
+       ///// アクセス
+       function GetHandle :T_cl_program;
+       procedure SetHandle( const Handle_:T_cl_program );
        ///// メソッド
        function Compile :T_cl_int;
        function Link :T_cl_int;
+       function CreateHandle :T_cl_int; virtual;
+       function DestroHandle :T_cl_int; virtual;
      public
+       constructor Create; override;
        constructor Create( const Buildrs_:TCLBuildrs_; const Device_:TCLDevice_ ); overload; virtual;
+       destructor Destroy; override;
        ///// プロパティ
-       property Execut        :TCLExecut_        read GetOwnere       ;
-       property Buildrs       :TCLBuildrs_       read GetParent       ;
-       property Handle        :T_cl_program      read   _Handle       ;
-       property Device        :TCLDevice_        read   _Device       ;
-       property CompileStatus :T_cl_build_status read   _CompileStatus;
-       property CompileLog    :String            read   _CompileLog   ;
-       property LinkStatus    :T_cl_build_status read   _LinkStatus   ;
-       property LinkLog       :String            read   _LinkLog      ;
+       property Execut        :TCLExecut_        read GetOwnere                       ;
+       property Buildrs       :TCLBuildrs_       read GetParent                       ;
+       property Handle        :T_cl_program      read GetHandle        write SetHandle;
+       property Device        :TCLDevice_        read   _Device                       ;
+       property CompileStatus :T_cl_build_status read   _CompileStatus                ;
+       property CompileLog    :String            read   _CompileLog                   ;
+       property LinkStatus    :T_cl_build_status read   _LinkStatus                   ;
+       property LinkLog       :String            read   _LinkLog                      ;
      end;
 
      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TCLBuildrs<TCLContex_,TCLPlatfo_>
@@ -146,7 +153,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        {$ENDIF}
        ///// メソッド
        function CreateHandle :T_cl_int; virtual;
-       procedure DestroHandle; virtual;
+       function DestroHandle :T_cl_int; virtual;
      public
        constructor Create; override;
        destructor Destroy; override;
@@ -200,7 +207,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        _Buildrs :TCLBuildrs_;
        _Kernels :TCLKernels_;
        ///// メソッド
-       procedure DestroHandle; override;
+       function DestroHandle :T_cl_int; override;
      public
        constructor Create; override;
        constructor Create( const Contex_:TCLContex_ ); overload; virtual;
@@ -267,12 +274,12 @@ uses System.IOUtils,
 
 function TCLBuildr<TCLContex_,TCLPlatfo_>.GetInfo<_TYPE_>( const Handle_:T_cl_program; const Name_:T_cl_program_build_info ) :_TYPE_;
 begin
-     AssertCL( clGetProgramBuildInfo( Handle_, Device.Handle, Name_, SizeOf( _TYPE_ ), @Result, nil ) );
+     AssertCL( clGetProgramBuildInfo( Handle_, Device.Handle, Name_, SizeOf( _TYPE_ ), @Result, nil ), 'TCLBuildr.GetInfo is Error!' );
 end;
 
 function TCLBuildr<TCLContex_,TCLPlatfo_>.GetInfoSize( const Handle_:T_cl_program; const Name_:T_cl_program_build_info ) :T_size_t;
 begin
-     AssertCL( clGetProgramBuildInfo( Handle_, Device.Handle, Name_, 0, nil, @Result ) );
+     AssertCL( clGetProgramBuildInfo( Handle_, Device.Handle, Name_, 0, nil, @Result ), 'TCLBuildr.GetInfoSize is Error!' );
 end;
 
 function TCLBuildr<TCLContex_,TCLPlatfo_>.GetInfos<_TYPE_>( const Handle_:T_cl_program; const Name_:T_cl_program_build_info ) :TArray<_TYPE_>;
@@ -283,7 +290,7 @@ begin
 
      SetLength( Result, S div Cardinal( SizeOf( _TYPE_ ) ) );
 
-     AssertCL( clGetProgramBuildInfo( Handle_, Device.Handle, Name_, S, @Result[ 0 ], nil ) );
+     AssertCL( clGetProgramBuildInfo( Handle_, Device.Handle, Name_, S, @Result[ 0 ], nil ), 'TCLBuildr.GetInfos is Error!' );
 end;
 
 function TCLBuildr<TCLContex_,TCLPlatfo_>.GetInfoString( const Handle_:T_cl_program; const Name_:T_cl_program_build_info ) :String;
@@ -293,17 +300,36 @@ end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
 
+/////////////////////////////////////////////////////////////////////// アクセス
+
+function TCLBuildr<TCLContex_,TCLPlatfo_>.GetHandle :T_cl_program;
+begin
+     if not Assigned( _Handle ) then AssertCL( CreateHandle, 'TCLBuildr.CreateHandle is Error!' );
+
+     Result := _Handle;
+end;
+
+procedure TCLBuildr<TCLContex_,TCLPlatfo_>.SetHandle( const Handle_:T_cl_program );
+begin
+     if Assigned( _Handle ) then AssertCL( DestroHandle, 'TCLBuildr.DestroHandle is Error!' );
+
+     _Handle := Handle_;
+end;
+
 /////////////////////////////////////////////////////////////////////// メソッド
 
 function TCLBuildr<TCLContex_,TCLPlatfo_>.Compile :T_cl_int;
 var
+   DH :T_cl_device_id;
    Os :String;
-   Hs :TArray<T_cl_program>;
-   Ns :TArray<P_char>;
+   LHs :TArray<T_cl_program>;
+   LNs :TArray<P_char>;
    Ls :TCLLibrars;
    L :TCLLibrar;
 begin
      inherited;
+
+     DH := Device.Handle;
 
      Os := '-cl-kernel-arg-info';
      if Ord( Execut.LangVer ) > 100 then Os := Os + ' -cl-std=CL' + Execut.LangVer.ToString;
@@ -312,47 +338,79 @@ begin
 
      for L in Ls do
      begin
-          Hs := Hs + [ L.Handle ];
-          Ns := Ns + [ P_char( AnsiString( L.Name ) ) ];
+          LHs := LHs + [ L.Handle ];
+          LNs := LNs + [ P_char( AnsiString( L.Name ) ) ];
      end;
 
      Result := clCompileProgram( Execut.Handle,
-                                 1, @Device.Handle,
+                                 1, @DH,
                                  P_char( AnsiString( Os ) ),
-                                 Ls.Count, @Hs[0], @Ns[0],
+                                 Ls.Count, @LHs[0], @LNs[0],
                                  nil, nil );
-
-     _CompileStatus := GetInfo<T_cl_build_status>( Execut.Handle, CL_PROGRAM_BUILD_STATUS );
-     _CompileLog    := GetInfoString             ( Execut.Handle, CL_PROGRAM_BUILD_LOG    );
 end;
 
 function TCLBuildr<TCLContex_,TCLPlatfo_>.Link :T_cl_int;
 var
-   H :T_cl_program;
+   DH :T_cl_device_id;
+   EH :T_cl_program;
 begin
-     H := Execut.Handle;
+     DH := Device.Handle;
+     EH := Execut.Handle;
 
      _Handle := clLinkProgram( TCLExecut( Execut ).Contex.Handle,
-                               1, @Device.Handle,
+                               1, @DH,
                                nil,
-                               1, @H,
+                               1, @EH,
                                nil, nil,
                                @Result );
+end;
 
-     _LinkStatus := GetInfo<T_cl_build_status>( _Handle, CL_PROGRAM_BUILD_STATUS );
-     _LinkLog    := GetInfoString             ( _Handle, CL_PROGRAM_BUILD_LOG    );
+//------------------------------------------------------------------------------
+
+function TCLBuildr<TCLContex_,TCLPlatfo_>.CreateHandle :T_cl_int;
+begin
+     if Compile = CL_SUCCESS then
+     begin
+          _CompileStatus := GetInfo<T_cl_build_status>( Execut.Handle, CL_PROGRAM_BUILD_STATUS );
+          _CompileLog    := GetInfoString             ( Execut.Handle, CL_PROGRAM_BUILD_LOG    );
+
+          if Link = CL_SUCCESS then
+          begin
+               _LinkStatus := GetInfo<T_cl_build_status>( _Handle, CL_PROGRAM_BUILD_STATUS );
+               _LinkLog    := GetInfoString             ( _Handle, CL_PROGRAM_BUILD_LOG    );
+          end
+          else Handle := nil;
+     end;
+end;
+
+function TCLBuildr<TCLContex_,TCLPlatfo_>.DestroHandle :T_cl_int;
+begin
+     Result := clReleaseProgram( _Handle );
+
+     _Handle := nil;
 end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
+
+constructor TCLBuildr<TCLContex_,TCLPlatfo_>.Create;
+begin
+     inherited;
+
+     _Handle := nil;
+end;
 
 constructor TCLBuildr<TCLContex_,TCLPlatfo_>.Create( const Buildrs_:TCLBuildrs_; const Device_:TCLDevice_ );
 begin
      inherited Create( Buildrs_ );
 
      _Device := Device_;
+end;
 
-     Compile;
-     Link;
+destructor TCLBuildr<TCLContex_,TCLPlatfo_>.Destroy;
+begin
+      Handle := nil;
+
+     inherited;
 end;
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TCLBuildrs<TCLContex_,TCLPlatfo_>
@@ -457,12 +515,12 @@ end;
 
 function TCLProgra<TCLContex_,TCLPlatfo_,TCLProgras_>.GetInfo<_TYPE_>( const Name_:T_cl_program_info ) :_TYPE_;
 begin
-     AssertCL( clGetProgramInfo( Handle, Name_, SizeOf( _TYPE_ ), @Result, nil ) );
+     AssertCL( clGetProgramInfo( Handle, Name_, SizeOf( _TYPE_ ), @Result, nil ), 'TCLProgra.GetInfo is Error!' );
 end;
 
 function TCLProgra<TCLContex_,TCLPlatfo_,TCLProgras_>.GetInfoSize( const Name_:T_cl_program_info ) :T_size_t;
 begin
-     AssertCL( clGetProgramInfo( Handle, Name_, 0, nil, @Result ) );
+     AssertCL( clGetProgramInfo( Handle, Name_, 0, nil, @Result ), 'TCLProgra.GetInfoSize is Error!' );
 end;
 
 function TCLProgra<TCLContex_,TCLPlatfo_,TCLProgras_>.GetInfos<_TYPE_>( const Name_:T_cl_program_info ) :TArray<_TYPE_>;
@@ -473,7 +531,7 @@ begin
 
      SetLength( Result, S div Cardinal( SizeOf( _TYPE_ ) ) );
 
-     AssertCL( clGetProgramInfo( Handle, Name_, S, @Result[ 0 ], nil ) );
+     AssertCL( clGetProgramInfo( Handle, Name_, S, @Result[ 0 ], nil ), 'TCLProgra.GetInfos is Error!' );
 end;
 
 function TCLProgra<TCLContex_,TCLPlatfo_,TCLProgras_>.GetInfoString( const Name_:T_cl_program_info ) :String;
@@ -487,14 +545,14 @@ end;
 
 function TCLProgra<TCLContex_,TCLPlatfo_,TCLProgras_>.GetHandle :T_cl_program;
 begin
-     if not Assigned( _Handle ) then AssertCL( CreateHandle );
+     if not Assigned( _Handle ) then AssertCL( CreateHandle, 'TCLProgra.CreateHandle is Error!' );
 
      Result := _Handle;
 end;
 
 procedure TCLProgra<TCLContex_,TCLPlatfo_,TCLProgras_>.SetHandle( const Handle_:T_cl_program );
 begin
-     if Assigned( _Handle ) then DestroHandle;
+     if Assigned( _Handle ) then AssertCL( DestroHandle, 'TCLProgra.DestroHandle is Error!' );
 
      _Handle := Handle_;
 end;
@@ -531,9 +589,9 @@ begin
      _Handle := clCreateProgramWithSource( TCLContex( Contex ).Handle, 1, @C, nil, @Result );
 end;
 
-procedure TCLProgra<TCLContex_,TCLPlatfo_,TCLProgras_>.DestroHandle;
+function TCLProgra<TCLContex_,TCLPlatfo_,TCLProgras_>.DestroHandle :T_cl_int;
 begin
-     clReleaseProgram( _Handle );
+     Result := clReleaseProgram( _Handle );
 
      _Handle := nil;
 end;
@@ -581,7 +639,7 @@ end;
 
 /////////////////////////////////////////////////////////////////////// メソッド
 
-procedure TCLExecut<TCLContex_,TCLPlatfo_>.DestroHandle;
+function TCLExecut<TCLContex_,TCLPlatfo_>.DestroHandle :T_cl_int;
 begin
      _Buildrs.Clear;
 

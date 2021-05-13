@@ -5,7 +5,7 @@ interface //####################################################################
 uses cl_version, cl_platform, cl,
      LUX.Data.List,
      LUX.Code.C,
-     LUX.GPU.OpenCL.root,
+     LUX.GPU.OpenCL.core,
      LUX.GPU.OpenCL.Device,
      LUX.GPU.OpenCL.Queuer,
      LUX.GPU.OpenCL.Progra,
@@ -42,7 +42,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        procedure SetHandle( const Handle_:T_cl_context );
        ///// メソッド
        function CreateHandle :T_cl_int; virtual;
-       procedure DestroHandle; virtual;
+       function DestroHandle :T_cl_int; virtual;
      public
        constructor Create; override;
        constructor Create( const Platfo_:TCLPlatfo_ ); overload; virtual;
@@ -96,14 +96,14 @@ uses LUX.GPU.OpenCL;
 
 function TCLContex<TCLPlatfo_>.GetHandle :T_cl_context;
 begin
-     if not Assigned( _Handle ) then AssertCL( CreateHandle );
+     if not Assigned( _Handle ) then AssertCL( CreateHandle, 'TCLContex.CreateHandle is Error!' );
 
      Result := _Handle;
 end;
 
 procedure TCLContex<TCLPlatfo_>.SetHandle( const Handle_:T_cl_context );
 begin
-     if Assigned( _Handle ) then DestroHandle;
+     if Assigned( _Handle ) then AssertCL( DestroHandle, 'TCLContex.DestroHandle is Error!' );
 
      _Handle := Handle_;
 end;
@@ -127,9 +127,9 @@ begin
                                  @Result );
 end;
 
-procedure TCLContex<TCLPlatfo_>.DestroHandle;
+function TCLContex<TCLPlatfo_>.DestroHandle :T_cl_int;
 begin
-     clReleaseContext( _Handle );
+     Result := clReleaseContext( _Handle );
 
      _Handle := nil;
 end;
