@@ -41,5 +41,30 @@ float2 VecToSky( const float3 Vec )
   return Result;
 }
 
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Rand
+
+uint rotl( const uint x, const int k )
+{
+  return ( x << k ) | ( x >> ( 32 - k ) );
+}
+
+float Rand( uint4* const Seed )
+{
+  const uint Result = rotl( Seed->x * 5, 7 ) * 9;
+
+  const uint t = Seed->y << 9;
+
+  Seed->z ^= Seed->x;
+  Seed->w ^= Seed->y;
+  Seed->y ^= Seed->z;
+  Seed->x ^= Seed->w;
+
+  Seed->z ^= t;
+
+  Seed->w = rotl( Seed->w, 11 );
+
+  return (float)( Result ) / 4294967296.0;
+}
+
 //############################################################################## ■
 #endif
