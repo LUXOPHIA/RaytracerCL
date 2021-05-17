@@ -1,5 +1,5 @@
-﻿#ifndef RAYTRACE_SHADER_CL
-#define RAYTRACE_SHADER_CL
+﻿#ifndef RAYTRACE_MATERIAL_CL
+#define RAYTRACE_MATERIAL_CL
 //############################################################################## ■
 
 #include<Math.cl>
