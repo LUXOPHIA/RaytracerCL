@@ -110,11 +110,11 @@ begin
 
      with _Contex.Librars do
      begin
-          Add.Source.LoadFromFile( '..\..\_DATA\Math.cl'            );
-          Add.Source.LoadFromFile( '..\..\_DATA\Math.D4x4.cl'     );
-          Add.Source.LoadFromFile( '..\..\_DATA\Color.cl'           );
-          Add.Source.LoadFromFile( '..\..\_DATA\Raytrace.core.cl'   );
-          Add.Source.LoadFromFile( '..\..\_DATA\Raytrace.Object.cl' );
+          Add.Source.LoadFromFile( '..\..\_DATA\Math.cl'              );
+          Add.Source.LoadFromFile( '..\..\_DATA\Math.D4x4.cl'         );
+          Add.Source.LoadFromFile( '..\..\_DATA\Color.cl'             );
+          Add.Source.LoadFromFile( '..\..\_DATA\Raytrace.core.cl'     );
+          Add.Source.LoadFromFile( '..\..\_DATA\Raytrace.Object.cl'   );
           Add.Source.LoadFromFile( '..\..\_DATA\Raytrace.Material.cl' );
      end;
 
