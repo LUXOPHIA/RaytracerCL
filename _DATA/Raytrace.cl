@@ -1,7 +1,7 @@
 ﻿//############################################################################## ■
 
 #include<Math.cl>
-#include<Math.Matrix.cl>
+#include<Math.D4x4.cl>
 #include<Color.cl>
 #include<Raytrace.core.cl>
 #include<Raytrace.Object.cl>
@@ -41,12 +41,12 @@ void Raytrace( TRay* const     Ray,
   {
     THit Hit = { INFINITY, (float3)( 0 ), (float3)( 0 ), 0 };                   // 衝突点の初期化
 
-    ///// OBJECT
+    ///// 物体
 
     if ( ObjGround( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 1 );                    // 地面とレイの交差判定
     if ( ObjSphere( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 1 );                    // 球体とレイの交差判定
 
-    ///// SHADER
+    ///// シェーダー
 
     switch( Hit.Sha )                                                           // シェーダーの切り替え
     {

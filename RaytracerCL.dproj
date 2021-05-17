@@ -263,7 +263,7 @@
         <None Include="_DATA\Raytrace.Object.cl"/>
         <None Include="_DATA\Color.cl"/>
         <None Include="_DATA\Raytrace.core.cl"/>
-        <None Include="_DATA\Math.Matrix.cl"/>
+        <None Include="_DATA\Math.D4x4.cl"/>
         <None Include="_DATA\Math.cl"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
