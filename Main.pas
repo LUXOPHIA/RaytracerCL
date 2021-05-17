@@ -115,7 +115,7 @@ begin
           Add.Source.LoadFromFile( '..\..\_DATA\Color.cl'           );
           Add.Source.LoadFromFile( '..\..\_DATA\Raytrace.core.cl'   );
           Add.Source.LoadFromFile( '..\..\_DATA\Raytrace.Object.cl' );
-          Add.Source.LoadFromFile( '..\..\_DATA\Raytrace.Shader.cl' );
+          Add.Source.LoadFromFile( '..\..\_DATA\Raytrace.Material.cl' );
      end;
 
      _Execut := _Contex.Executs.Add;

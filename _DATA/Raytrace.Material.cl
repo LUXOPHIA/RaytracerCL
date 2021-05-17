@@ -11,10 +11,10 @@
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ShaSkyere
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MatSkyere
 // 空
 
-bool ShaSkydom( TRay* const     Ray,
+bool MatSkydom( TRay* const     Ray,
                 const THit*     Hit,
                 const image2d_t Tex,
                 const sampler_t Sam )
@@ -24,10 +24,10 @@ bool ShaSkydom( TRay* const     Ray,
   return false;  // レイトレーシングの中断
 }
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ShaMirror
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MatMirror
 // 鏡面
 
-bool ShaMirror( TRay* const Ray,
+bool MatMirror( TRay* const Ray,
                 const THit* Hit )
 {
   Ray->Pos = Hit->Pos + _EmitShift * Hit->Nor;  // 反射位置

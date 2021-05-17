@@ -259,7 +259,7 @@
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX\Curve\LUX.Curve.BSpline.pas"/>
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX\Curve\LUX.Curve.BSpline.D2.pas"/>
         <None Include="_DATA\Raytrace.cl"/>
-        <None Include="_DATA\Raytrace.Shader.cl"/>
+        <None Include="_DATA\Raytrace.Material.cl"/>
         <None Include="_DATA\Raytrace.Object.cl"/>
         <None Include="_DATA\Color.cl"/>
         <None Include="_DATA\Raytrace.core.cl"/>
