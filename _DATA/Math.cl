@@ -63,7 +63,7 @@ float Random( uint4* const See )
 
   See->w = rotl( See->w, 11 );
 
-  return as_float( Result & 0x007FFFFFu | 0x3F800000u ) - 1;
+  return as_float( ( Result & 0x007FFFFFu ) | 0x3F800000u ) - 1;
 }
 
 //############################################################################## ■
