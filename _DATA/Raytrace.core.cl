@@ -12,6 +12,8 @@ typedef struct
   int2   Siz;  // 総数
   int2   Pos;  // 位置
   uint4  See;  // 乱数シード
+  float3 Rad;  // 輝度
+  uint   Acu;  // 蓄積数
   float3 Col;  // 色
 }
 TPix;
