@@ -8,6 +8,8 @@ uses
   FMX.Objects, FMX.Memo.Types, FMX.Controls.Presentation, FMX.ScrollBox, FMX.Memo, FMX.TabControl,
   cl_version, cl_platform, cl,
   LUX, LUX.D1, LUX.D2, LUX.D3, LUX.D4, LUX.D4x4,
+  LUX.Random.Xoshiro.B32,
+  LUX.Random.Xoshiro.B32.P128,
   LUX.GPU.OpenCL,
   LUX.GPU.OpenCL.FMX;
 
@@ -32,21 +34,26 @@ type
     _MouseS :TShiftState;
     _MouseP :TPointF;
     _MouseC :TPointF;
+    ///// メソッド
+    procedure ShowBuildr;
   public
     { public 宣言 }
     _Platfo :TCLPlatfo;
     _Device :TCLDevice;
     _Contex :TCLContex;
     _Queuer :TCLQueuer;
-    _Buffer :TCLDevBuf<TSingleM4>;
     _Imager :TCLDevIma2DxBGRAxUFix8;
+    _Seeder :TCLDevIma2DxRGBAxUInt32;
+    _Accumr :TCLDevIma2DxRGBAxSFlo32;
+    _AccumN :TCLDevBuf<UInt32>;
+    _Camera :TCLDevBuf<TSingleM4>;
     _Textur :TCLDevIma2DxRGBAxSFlo32;
     _Samplr :TCLSamplr;
     _Execut :TCLExecut;
     _Buildr :TCLBuildr;
     _Kernel :TCLKernel;
     ///// メソッド
-    procedure ShowBuildr;
+    procedure InitSeeder;
   end;
 
 var
@@ -59,8 +66,6 @@ implementation //###############################################################
 uses System.Math;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
-
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
 
 procedure TForm1.ShowBuildr;
 begin
@@ -84,6 +89,23 @@ begin
      TabControl1.ActiveTab := TabItemP;
 end;
 
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
+
+procedure TForm1.InitSeeder;
+var
+   R :IRandom32XOS128;
+   X, Y :Integer;
+begin
+     R := TRandom32XOS128x64ss.Create;
+
+     _Seeder.Storag.Map;
+
+     for Y := 0 to _Seeder.CountY-1 do
+     for X := 0 to _Seeder.CountX-1 do _Seeder.Storag[ X, Y ] := R.DrawSeed;
+
+     _Seeder.Storag.Unmap;
+end;
+
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -96,12 +118,29 @@ begin
      _Contex := _Platfo.Contexs.Add;
      _Queuer := _Contex.Queuers.Add( _Device );
 
-     _Buffer := TCLDevBuf<TSingleM4>.Create( _Contex, _Queuer );
-     _Buffer.Count := 1;
-
      _Imager := TCLDevIma2DxBGRAxUFix8.Create( _Contex, _Queuer );
      _Imager.CountX := 800;
      _Imager.CountY := 600;
+
+     _Seeder := TCLDevIma2DxRGBAxUInt32.Create( _Contex, _Queuer );
+     _Seeder.CountX := _Imager.CountX;
+     _Seeder.CountY := _Imager.CountY;
+
+     InitSeeder;
+
+     _Accumr := TCLDevIma2DxRGBAxSFlo32.Create( _Contex, _Queuer );
+     _Accumr.CountX := _Imager.CountX;
+     _Accumr.CountY := _Imager.CountY;
+
+     _AccumN := TCLDevBuf<UInt32>.Create( _Contex, _Queuer );
+     _AccumN.Count := 1;
+
+     _AccumN.Storag.Map;
+     _AccumN.Storag[ 0 ] := 0;
+     _AccumN.Storag.Unmap;
+
+     _Camera := TCLDevBuf<TSingleM4>.Create( _Contex, _Queuer );
+     _Camera.Count := 1;
 
      _Textur := TCLDevIma2DxRGBAxSFlo32.Create( _Contex, _Queuer );
      _Textur.LoadFromFileHDR( '..\..\_DATA\Luxo-Jr_2000x1000.hdr' );
@@ -126,10 +165,15 @@ begin
      if Assigned( _Buildr.Handle ) then
      begin
           _Kernel := _Execut.Kernels.Add( 'Main', _Queuer );
-          _Kernel.Parames['Buffer'] := _Buffer;
+
           _Kernel.Parames['Imager'] := _Imager;
+          _Kernel.Parames['Seeder'] := _Seeder;
+          _Kernel.Parames['Accumr'] := _Accumr;
+          _Kernel.Parames['AccumN'] := _AccumN;
+          _Kernel.Parames['Camera'] := _Camera;
           _Kernel.Parames['Textur'] := _Textur;
           _Kernel.Parames['Samplr'] := _Samplr;
+
           _Kernel.GloSizX := _Imager.CountX;
           _Kernel.GloSizY := _Imager.CountY;
 
@@ -152,13 +196,17 @@ end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin
-     _Buffer.Storag.Map;
-     _Buffer.Storag[ 0 ] := TSingleM4.RotateY( DegToRad( -_MouseC.X ) )
+     _Camera.Storag.Map;
+     _Camera.Storag[ 0 ] := TSingleM4.RotateY( DegToRad( -_MouseC.X ) )
                           * TSingleM4.RotateX( DegToRad( -_MouseC.Y ) )
                           * TSingleM4.Translate( 0, 0, 3 );
-     _Buffer.Storag.Unmap;
+     _Camera.Storag.Unmap;
 
      _Kernel.Run;
+
+     _AccumN.Storag.Map;
+     _AccumN.Storag[ 0 ] := _AccumN.Storag[ 0 ] + 100;
+     _AccumN.Storag.Unmap;
 
      _Imager.CopyTo( Image1.Bitmap );
 end;
@@ -180,6 +228,10 @@ begin
           P := TPointF.Create( X, Y );
           _MouseC := _MouseC + ( P - _MouseP );
           _MouseP := P;
+
+          _AccumN.Storag.Map;
+          _AccumN.Storag[ 0 ] := 0;
+          _AccumN.Storag.Unmap;
      end;
 end;
 
