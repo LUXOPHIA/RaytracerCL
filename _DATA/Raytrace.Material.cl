@@ -35,7 +35,7 @@ bool MatMirror( TRay*  const Ray,
   Ray->Pos = Hit->Pos + _EmiShift * Hit->Nor;  // 反射位置
   Ray->Vec = Reflect( Ray->Vec, Hit->Nor );    // 反射ベクトル
 
-  return true;  // レイトレーシングの続行
+  return ( Random( See ) < 0.5 );  // レイトレーシングの続行
 }
 
 //############################################################################## ■
