@@ -84,7 +84,7 @@ kernel void Main( write_only image2d_t  Imager,
   Pix.Siz = (int2)( get_global_size( 0 ), get_global_size( 1 ) );               // 画像サイズ
   Pix.Pos = (int2)( get_global_id  ( 0 ), get_global_id  ( 1 ) );               // ピクセル座標
   Pix.See = read_imageui( Seeder, Pix.Pos );                                    // 乱数シードを取得
-  Pix.Rad = read_imagef ( Accumr, Pix.Pos ).rgb;                                // ピクセル輝度を取得
+  Pix.Rad = read_imagef ( Accumr, Pix.Pos ).xyz;                                // ピクセル輝度を取得
   Pix.Acu = AccumN[0];                                                          // 蓄積数を取得
 
   Eye.Pos = (float3)( 0, 0, 0 );                                                // 視点位置

@@ -20,7 +20,7 @@ bool MatSkydom( TRay*  const     Ray,
                 const  image2d_t Tex,
                 const  sampler_t Sam )
 {
-  Ray->Rad += read_imagef( Tex, Sam, VecToSky( Ray->Vec ) ).rgb;  // 輝度を加算
+  Ray->Rad += read_imagef( Tex, Sam, VecToSky( Ray->Vec ) ).xyz;  // 輝度を加算
 
   return false;  // レイトレーシングの中断
 }

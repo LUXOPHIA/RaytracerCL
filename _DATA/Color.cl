@@ -22,7 +22,7 @@ float3 ToneMap( const float3 Color, const float White )
 
 float3 GammaCorrect( const float3 Color, const float Gamma )
 {
-  return pow( Color.rgb, 1 / Gamma );
+  return pow( Color.xyz, 1 / Gamma );
 }
 
 //############################################################################## ■
