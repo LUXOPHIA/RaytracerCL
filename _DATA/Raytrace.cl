@@ -70,7 +70,6 @@ void Raytrace( TRay*  const     Ray,
 kernel void Main( write_only image2d_t  Imager,
                   read_write image2d_t  Seeder,
                   read_write image2d_t  Accumr,
-                  global     uint*      AccumN,
                   global     TSingleM4* Camera,
                   read_only  image2d_t  Textur,
                   const      sampler_t  Samplr )
@@ -84,8 +83,7 @@ kernel void Main( write_only image2d_t  Imager,
   Pix.Siz = (int2)( get_global_size( 0 ), get_global_size( 1 ) );               // 画像サイズ
   Pix.Pos = (int2)( get_global_id  ( 0 ), get_global_id  ( 1 ) );               // ピクセル座標
   Pix.See = read_imageui( Seeder, Pix.Pos );                                    // 乱数シードを取得
-  Pix.Rad = read_imagef ( Accumr, Pix.Pos ).xyz;                                // ピクセル輝度を取得
-  Pix.Acu = AccumN[0];                                                          // 蓄積数を取得
+  Pix.Rad = read_imagef ( Accumr, Pix.Pos );                                    // ピクセル輝度を取得
 
   Eye.Pos = (float3)( 0, 0, 0 );                                                // 視点位置
 
@@ -95,7 +93,7 @@ kernel void Main( write_only image2d_t  Imager,
 
   Cam.Mov = Camera[0];                                                          // カメラの姿勢
 
-  for ( int N = Pix.Acu+1; N < Pix.Acu+1+100; N++ )
+  for ( int N = 1; N <= 128; N++ )
   {
     Ray.Pos = MulPos( Cam.Mov, Eye.Pos );                                       // レイ出射位置
     Ray.Vec = MulVec( Cam.Mov, normalize( Scr.Pos - Eye.Pos ) );                // レイベクトル
@@ -103,12 +101,13 @@ kernel void Main( write_only image2d_t  Imager,
 
     Raytrace( &Ray, &Pix.See, Textur, Samplr );                                 // レイトレーシング
 
-    Pix.Rad += ( Ray.Rad - Pix.Rad ) / N;                                       // ピクセル輝度
+    Pix.Rad.w   += 1;                                                           // 標本数
+    Pix.Rad.xyz += ( Ray.Rad - Pix.Rad.xyz ) / Pix.Rad.w;                       // ピクセル輝度
   }
 
-  Pix.Col = GammaCorrect( ToneMap( Pix.Rad, 100 ), 2.2 );                       // ピクセル色
+  Pix.Col = GammaCorrect( ToneMap( Pix.Rad.xyz, 100 ), 2.2 );                   // ピクセル色
 
-  write_imagef ( Accumr, Pix.Pos, (float4)( Pix.Rad, 1 ) );                     // ピクセル輝度を保存
+  write_imagef ( Accumr, Pix.Pos,           Pix.Rad      );                     // ピクセル輝度を保存
   write_imageui( Seeder, Pix.Pos,           Pix.See      );                     // 乱数シードを保存
   write_imagef ( Imager, Pix.Pos, (float4)( Pix.Col, 1 ) );                     // ピクセル色を保存
 }
