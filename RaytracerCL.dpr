@@ -20,7 +20,6 @@ uses
   LUX.Data.List in '_LIBRARY\LUXOPHIA\LUX\Data\List\LUX.Data.List.pas',
   LUX.GPU.OpenCL.Show in '_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\LUX.GPU.OpenCL.Show.pas',
   LUX.GPU.OpenCL.FMX in '_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\LUX.GPU.OpenCL.FMX.pas',
-  LUX.Complex in '_LIBRARY\LUXOPHIA\LUX\Complex\LUX.Complex.pas',
   LUX.D1 in '_LIBRARY\LUXOPHIA\LUX\LUX.D1.pas',
   LUX.Data.Tree in '_LIBRARY\LUXOPHIA\LUX\Data\List\LUX.Data.Tree.pas',
   LUX.GPU.OpenCL.Argume.Memory.Buffer in '_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\LUX.GPU.OpenCL.Argume.Memory.Buffer.pas',
@@ -59,12 +58,9 @@ uses
   LUX.D3x3 in '_LIBRARY\LUXOPHIA\LUX\LUX.D3x3.pas',
   LUX.Curve.BSpline in '_LIBRARY\LUXOPHIA\LUX\Curve\LUX.Curve.BSpline.pas',
   LUX.Curve.BSpline.D2 in '_LIBRARY\LUXOPHIA\LUX\Curve\LUX.Curve.BSpline.D2.pas',
-  LUX.Random in '_LIBRARY\LUXOPHIA\LUX\Random\LUX.Random.pas',
-  LUX.Random.Xoshiro in '_LIBRARY\LUXOPHIA\LUX\Random\LUX.Random.Xoshiro.pas',
-  LUX.Random.Xoshiro.B64 in '_LIBRARY\LUXOPHIA\LUX\Random\Xoshiro\LUX.Random.Xoshiro.B64.pas',
-  LUX.Random.Xoshiro.B32 in '_LIBRARY\LUXOPHIA\LUX\Random\Xoshiro\LUX.Random.Xoshiro.B32.pas',
-  LUX.Random.Xoshiro.B32.P64 in '_LIBRARY\LUXOPHIA\LUX\Random\Xoshiro\B32\LUX.Random.Xoshiro.B32.P64.pas',
-  LUX.Random.Xoshiro.B32.P128 in '_LIBRARY\LUXOPHIA\LUX\Random\Xoshiro\B32\LUX.Random.Xoshiro.B32.P128.pas';
+  LUX.GPU.OpenCL.Argume.Memory.Imager.D2.Seeder in '_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\LUX.GPU.OpenCL.Argume.Memory.Imager.D2.Seeder.pas',
+  LUX.GPU.OpenCL.Argume.Memory.Imager.D1.Seeder in '_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\LUX.GPU.OpenCL.Argume.Memory.Imager.D1.Seeder.pas',
+  LUX.GPU.OpenCL.Argume.Memory.Imager.D3.Seeder in '_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\LUX.GPU.OpenCL.Argume.Memory.Imager.D3.Seeder.pas';
 
 {$R *.res}
 

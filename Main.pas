@@ -8,8 +8,6 @@ uses
   FMX.Objects, FMX.Memo.Types, FMX.Controls.Presentation, FMX.ScrollBox, FMX.Memo, FMX.TabControl,
   cl_version, cl_platform, cl,
   LUX, LUX.D1, LUX.D2, LUX.D3, LUX.D4, LUX.D4x4,
-  LUX.Random.Xoshiro.B32,
-  LUX.Random.Xoshiro.B32.P128,
   LUX.GPU.OpenCL,
   LUX.GPU.OpenCL.FMX;
 
@@ -42,17 +40,15 @@ type
     _Device :TCLDevice;
     _Contex :TCLContex;
     _Queuer :TCLQueuer;
-    _Imager :TCLDevIma2DxBGRAxUFix8;
-    _Seeder :TCLDevIma2DxRGBAxUInt32;
-    _Accumr :TCLDevIma2DxRGBAxSFlo32;
+    _Imager :TCLImager2DxBGRAxUFix8;
+    _Seeder :TCLSeeder2D;
+    _Accumr :TCLImager2DxRGBAxSFlo32;
     _Camera :TCLDevBuf<TSingleM4>;
-    _Textur :TCLDevIma2DxRGBAxSFlo32;
+    _Textur :TCLImager2DxRGBAxSFlo32;
     _Samplr :TCLSamplr;
     _Execut :TCLExecut;
     _Buildr :TCLBuildr;
     _Kernel :TCLKernel;
-    ///// メソッド
-    procedure InitSeeder;
   end;
 
 var
@@ -91,21 +87,6 @@ end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
 
-procedure TForm1.InitSeeder;
-var
-   R :IRandom32XOS128;
-   X, Y :Integer;
-begin
-     R := TRandom32XOS128x64ss.Create;
-
-     _Seeder.Storag.Map;
-
-     for Y := 0 to _Seeder.CountY-1 do
-     for X := 0 to _Seeder.CountX-1 do _Seeder.Storag[ X, Y ] := R.DrawSeed;
-
-     _Seeder.Storag.Unmap;
-end;
-
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -118,24 +99,22 @@ begin
      _Contex := _Platfo.Contexs.Add;
      _Queuer := _Contex.Queuers.Add( _Device );
 
-     _Imager := TCLDevIma2DxBGRAxUFix8.Create( _Contex, _Queuer );
+     _Imager := TCLImager2DxBGRAxUFix8.Create( _Contex, _Queuer );
      _Imager.CountX := 800;
      _Imager.CountY := 600;
 
-     _Seeder := TCLDevIma2DxRGBAxUInt32.Create( _Contex, _Queuer );
+     _Seeder := TCLSeeder2D.Create( _Contex, _Queuer );
      _Seeder.CountX := _Imager.CountX;
      _Seeder.CountY := _Imager.CountY;
 
-     InitSeeder;
-
-     _Accumr := TCLDevIma2DxRGBAxSFlo32.Create( _Contex, _Queuer );
+     _Accumr := TCLImager2DxRGBAxSFlo32.Create( _Contex, _Queuer );
      _Accumr.CountX := _Imager.CountX;
      _Accumr.CountY := _Imager.CountY;
 
      _Camera := TCLDevBuf<TSingleM4>.Create( _Contex, _Queuer );
      _Camera.Count := 1;
 
-     _Textur := TCLDevIma2DxRGBAxSFlo32.Create( _Contex, _Queuer );
+     _Textur := TCLImager2DxRGBAxSFlo32.Create( _Contex, _Queuer );
      _Textur.LoadFromFileHDR( '..\..\_DATA\Luxo-Jr_2000x1000.hdr' );
 
      _Samplr := TCLSamplr.Create( _Contex );
