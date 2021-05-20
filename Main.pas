@@ -45,7 +45,6 @@ type
     _Imager :TCLDevIma2DxBGRAxUFix8;
     _Seeder :TCLDevIma2DxRGBAxUInt32;
     _Accumr :TCLDevIma2DxRGBAxSFlo32;
-    _AccumN :TCLDevBuf<UInt32>;
     _Camera :TCLDevBuf<TSingleM4>;
     _Textur :TCLDevIma2DxRGBAxSFlo32;
     _Samplr :TCLSamplr;
@@ -63,7 +62,8 @@ implementation //###############################################################
 
 {$R *.fmx}
 
-uses System.Math;
+uses System.Math,
+     LUX.Color;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
 
@@ -132,13 +132,6 @@ begin
      _Accumr.CountX := _Imager.CountX;
      _Accumr.CountY := _Imager.CountY;
 
-     _AccumN := TCLDevBuf<UInt32>.Create( _Contex, _Queuer );
-     _AccumN.Count := 1;
-
-     _AccumN.Storag.Map;
-     _AccumN.Storag[ 0 ] := 0;
-     _AccumN.Storag.Unmap;
-
      _Camera := TCLDevBuf<TSingleM4>.Create( _Contex, _Queuer );
      _Camera.Count := 1;
 
@@ -169,7 +162,6 @@ begin
           _Kernel.Parames['Imager'] := _Imager;
           _Kernel.Parames['Seeder'] := _Seeder;
           _Kernel.Parames['Accumr'] := _Accumr;
-          _Kernel.Parames['AccumN'] := _AccumN;
           _Kernel.Parames['Camera'] := _Camera;
           _Kernel.Parames['Textur'] := _Textur;
           _Kernel.Parames['Samplr'] := _Samplr;
@@ -204,10 +196,6 @@ begin
 
      _Kernel.Run;
 
-     _AccumN.Storag.Map;
-     _AccumN.Storag[ 0 ] := _AccumN.Storag[ 0 ] + 100;
-     _AccumN.Storag.Unmap;
-
      _Imager.CopyTo( Image1.Bitmap );
 end;
 
@@ -229,9 +217,7 @@ begin
           _MouseC := _MouseC + ( P - _MouseP );
           _MouseP := P;
 
-          _AccumN.Storag.Map;
-          _AccumN.Storag[ 0 ] := 0;
-          _AccumN.Storag.Unmap;
+          _Accumr.Fill( TSingleRGBA.Create( 0 ) );
      end;
 end;
 
