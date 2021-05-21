@@ -43,7 +43,7 @@ type
     _Imager :TCLImager2DxBGRAxUFix8;
     _Seeder :TCLSeeder2D;
     _Accumr :TCLImager2DxRGBAxSFlo32;
-    _Camera :TCLDevBuf<TSingleM4>;
+    _Camera :TCLBuffer<TSingleM4>;
     _Textur :TCLImager2DxRGBAxSFlo32;
     _Samplr :TCLSamplr;
     _Execut :TCLExecut;
@@ -111,7 +111,7 @@ begin
      _Accumr.CountX := _Imager.CountX;
      _Accumr.CountY := _Imager.CountY;
 
-     _Camera := TCLDevBuf<TSingleM4>.Create( _Contex, _Queuer );
+     _Camera := TCLBuffer<TSingleM4>.Create( _Contex, _Queuer );
      _Camera.Count := 1;
 
      _Textur := TCLImager2DxRGBAxSFlo32.Create( _Contex, _Queuer );
