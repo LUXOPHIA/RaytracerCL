@@ -92,7 +92,7 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
      _MouseS := [];
-     _MouseC := TPointF.Create( 0, 0 );
+     _MouseC := TPointF.Create( -60, +10 );
 
      _Platfo := TOpenCL.Platfos[ 0 ];
      _Device := _Platfo.Devices[ 0 ];
