@@ -31,6 +31,7 @@ TEye;
 
 typedef struct
 {
+  float2 Siz;  // サイズ
   float3 Pos;  // 位置
 }
 TScr;
@@ -51,6 +52,7 @@ typedef struct
 {
   float3 Pos;  // 出射位置
   float3 Vec;  // ベクトル
+  float3 Wei;  // ウェイト
   float3 Rad;  // 輝度
 }
 TRay;

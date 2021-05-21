@@ -85,24 +85,26 @@ kernel void Main( write_only image2d_t  Imager,
   Pix.See = read_imageui( Seeder, Pix.Pos );                                    // 乱数シードを取得
   Pix.Rad = read_imagef ( Accumr, Pix.Pos );                                    // ピクセル輝度を取得
 
-  Eye.Pos = (float3)( 0, 0, 0 );                                                // 視点位置
+  Eye.Pos = (float3)0;                                                          // 視点位置
 
-  Scr.Pos.x = 4.0 * ( Pix.Pos.x + 0.5 ) / Pix.Siz.x - 2.0;                      // スクリーン上のピクセル位置
-  Scr.Pos.y = 1.5 - 3.0 * ( Pix.Pos.y + 0.5 ) / Pix.Siz.y;
+  Scr.Siz = (float2)( 4, 3 );
+  Scr.Pos.x = Scr.Siz.x * ( ( Pix.Pos.x + 0.5 ) / Pix.Siz.x - 0.5 );            // スクリーン上のピクセル位置
+  Scr.Pos.y = Scr.Siz.y * ( 0.5 - ( Pix.Pos.y + 0.5 ) / Pix.Siz.y );
   Scr.Pos.z = -2;
 
   Cam.Mov = Camera[0];                                                          // カメラの姿勢
 
   for ( int N = 1; N <= 128; N++ )
   {
-    Ray.Pos = MulPos( Cam.Mov, Eye.Pos );                                       // レイ出射位置
-    Ray.Vec = MulVec( Cam.Mov, normalize( Scr.Pos - Eye.Pos ) );                // レイベクトル
-    Ray.Rad = (float3)( 0 );                                                    // レイ輝度
+    Ray.Pos = MulPos( Cam.Mov, Eye.Pos );                                       // レイの出射位置
+    Ray.Vec = MulVec( Cam.Mov, normalize( Scr.Pos - Eye.Pos ) );                // レイのベクトル
+    Ray.Wei = (float3)1;                                                        // レイのウェイト
+    Ray.Rad = (float3)0;                                                        // レイの輝度
 
     Raytrace( &Ray, &Pix.See, Textur, Samplr );                                 // レイトレーシング
 
     Pix.Rad.w   += 1;                                                           // 標本数
-    Pix.Rad.xyz += ( Ray.Rad - Pix.Rad.xyz ) / Pix.Rad.w;                       // ピクセル輝度
+    Pix.Rad.xyz += ( Ray.Wei * Ray.Rad - Pix.Rad.xyz ) / Pix.Rad.w;             // ピクセル輝度
   }
 
   Pix.Col = GammaCorrect( ToneMap( Pix.Rad.xyz, 100 ), 2.2 );                   // ピクセル色
