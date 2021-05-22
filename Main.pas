@@ -146,7 +146,7 @@ begin
      _Execut := _Contex.Executs.Add;
      _Execut.Source.LoadFromFile( '..\..\_DATA\Raytrace.cl' );
 
-     _Buildr := _Execut.BuildTo( _Device );
+     _Buildr := _Execut.Buildrs[ _Device ];
 
      if Assigned( _Buildr.Handle ) then
      begin
