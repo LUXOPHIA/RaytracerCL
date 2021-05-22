@@ -152,6 +152,8 @@ begin
      begin
           _Kernel := _Execut.Kernels.Add( 'Main', _Queuer );
 
+          Assert( Assigned( _Kernel.Handle ), '_Kernel is Error!' );
+
           _Kernel.Parames['Imager'] := _Imager;
           _Kernel.Parames['Seeder'] := _Seeder;
           _Kernel.Parames['Accumr'] := _Accumr;
