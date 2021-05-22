@@ -14,8 +14,8 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ObjGround
 // 地面
 
-bool ObjGround( const TRay* Ray,
-                TTap* const Tap )
+bool ObjPlain( const TRay* Ray,
+               TTap* const Tap )
 {
   if ( 0 <= Ray->Vec.y ) return false;  // 交差なし
 
@@ -33,8 +33,8 @@ bool ObjGround( const TRay* Ray,
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ObjSphere
 // 球体
 
-bool ObjSphere( const TRay* Ray,
-                TTap* const Tap )
+bool ObjSpher( const TRay* Ray,
+               TTap* const Tap )
 {
   float B = dot( Ray->Pos, Ray->Vec );
   float C = Length2( Ray->Pos ) - 1;
