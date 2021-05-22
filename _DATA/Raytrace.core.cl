@@ -82,16 +82,53 @@ THit;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【定数】
 
-constant float _EmiShift = 0.0001;                                                 // 放射シフト量
+constant float _EmiShift = 0.0001;                                              // 放射シフト量
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Reflect
-// 鏡面反射
+// 完全反射
 
-float3 Reflect( const float3 RayV, const float3 NorV )
+float3 Reflect( const float3 RayV,
+                const float3 NorV )
 {
   return RayV - 2.0f * ( dot( RayV, NorV ) * NorV );
+}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Fresnel
+
+float Fresnel( const float3 RayV,
+               const float3 NorV,
+               const float  IOR0,
+               const float  IOR1 )
+{
+  float C = dot( RayV, NorV );
+
+  float C2  = Pow2( C );
+  float I2  = Pow2( IOR1/IOR0 );
+  float CI2 = C * I2;
+  float G   = sqrt( C2 + I2 - 1 );
+  return ( Pow2( ( C   + G ) / ( C   - G ) )         // (G+C)/(G-C)
+         + Pow2( ( CI2 + G ) / ( CI2 - G ) ) ) / 2;
+
+  // float R0 = Pow2( ( IOR0 - IOR1 ) / ( IOR0 + IOR1 ) );
+  // return R0 + ( 1 - R0 ) * pow( 1 + C, 5 );
+}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Refract
+// 完全屈折
+
+float3 Refract( const float3 RayV,
+                const float3 NorV,
+                const float  IOR0,
+                const float  IOR1 )
+{
+  float C  = dot( RayV, NorV );
+  float C2  = Pow2( C );
+  float I2 = Pow2( IOR1/IOR0 );
+  float G  = sqrt( C2 + I2 - 1 );
+
+  return IOR0/IOR1 * ( RayV - ( C + G ) * NorV );
 }
 
 //############################################################################## ■
