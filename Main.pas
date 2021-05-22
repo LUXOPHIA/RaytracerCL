@@ -49,6 +49,10 @@ type
     _Execut :TCLExecut;
     _Buildr :TCLBuildr;
     _Kernel :TCLKernel;
+    ///// メソッド
+    procedure MakeContext;
+    procedure MakeArguments;
+    procedure MakePrograms;
   end;
 
 var
@@ -62,6 +66,8 @@ uses System.Math,
      LUX.Color;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
+
+/////////////////////////////////////////////////////////////////////// メソッド
 
 procedure TForm1.ShowBuild;
 begin
@@ -87,18 +93,21 @@ end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
 
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+/////////////////////////////////////////////////////////////////////// メソッド
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TForm1.MakeContext;
 begin
-     _MouseS := [];
-     _MouseC := TPointF.Create( -60, +10 );
-
      _Platfo := TOpenCL.Platfos[ 0 ];
      _Device := _Platfo.Devices[ 0 ];
      _Contex := _Platfo.Contexs.Add;
      _Queuer := _Contex.Queuers.Add( _Device );
 
+end;
+
+//------------------------------------------------------------------------------
+
+procedure TForm1.MakeArguments;
+begin
      _Imager := TCLImager2DxBGRAxUFix8.Create( _Contex, _Queuer );
      _Imager.CountX := 800;
      _Imager.CountY := 600;
@@ -118,7 +127,12 @@ begin
      _Textur.LoadFromFileHDR( '..\..\_DATA\Luxo-Jr_2000x1000.hdr' );
 
      _Samplr := TCLSamplr.Create( _Contex );
+end;
 
+//------------------------------------------------------------------------------
+
+procedure TForm1.MakePrograms;
+begin
      with _Contex.Librars do
      begin
           Add.Source.LoadFromFile( '..\..\_DATA\Math.cl'              );
@@ -152,6 +166,20 @@ begin
                                      else TabControl1.ActiveTab := TabItemS;
      end
      else ShowBuild;
+end;
+
+//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+     _MouseS := [];
+     _MouseC := TPointF.Create( -60, +10 );
+
+     MakeContext;
+
+     MakeArguments;
+
+     MakePrograms;
 
      TOpenCL.Show( MemoS.Lines );
 end;
