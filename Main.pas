@@ -33,7 +33,7 @@ type
     _MouseP :TPointF;
     _MouseC :TPointF;
     ///// メソッド
-    procedure ShowBuildr;
+    procedure ShowBuild;
   public
     { public 宣言 }
     _Platfo :TCLPlatfo;
@@ -63,7 +63,7 @@ uses System.Math,
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& private
 
-procedure TForm1.ShowBuildr;
+procedure TForm1.ShowBuild;
 begin
      with MemoPB.Lines do
      begin
@@ -151,7 +151,7 @@ begin
           if _Kernel.Parames.BindsOK then Timer1.Enabled := True
                                      else TabControl1.ActiveTab := TabItemS;
      end
-     else ShowBuildr;
+     else ShowBuild;
 
      TOpenCL.Show( MemoS.Lines );
 end;
