@@ -48,15 +48,16 @@ void Raytrace( TRay*  const     Ray,
 
     ///// 物体
 
-    if ( ObjGround( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 1 );                    // 地面とレイの交差判定
-    if ( ObjSphere( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 1 );                    // 球体とレイの交差判定
+    if ( ObjPlain( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 1 );                     // 地面とレイの交差判定
+    if ( ObjSpher( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 2 );                     // 球体とレイの交差判定
 
     ///// 材質
 
     switch( Hit.Mat )                                                           // 材質の選択
     {
-      case 0: Emi = MatSkydom( Ray, &Hit, See, Tex, Sam ); break;               // 空
-      case 1: Emi = MatMirror( Ray, &Hit, See           ); break;               // 鏡面
+      case 0: Emi = MatSkyer( Ray, &Hit, See, Tex, Sam ); break;                // 空
+      case 1: Emi = MatMirro( Ray, &Hit, See           ); break;                // 鏡面
+      case 2: Emi = MatWater( Ray, &Hit, See           ); break;                // 水面
     }
 
     if ( !Emi ) break;                                                          // 放射しなければ終了
