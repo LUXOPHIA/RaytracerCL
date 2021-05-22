@@ -42,8 +42,8 @@ void Raytrace( TRay*  const     Ray,
   for ( int N = 0; N < 10; N++ )
   {
     Hit.Dis = INFINITY;                                                         // 衝突点までの距離
-    Hit.Pos = (float3)( 0 );                                                    // 衝突点の位置
-    Hit.Nor = (float3)( 0 );                                                    // 衝突点の法線
+    Hit.Pos = (float3)0;                                                        // 衝突点の位置
+    Hit.Nor = (float3)0;                                                        // 衝突点の法線
     Hit.Mat = 0;                                                                // 衝突点の材質ＩＤ
 
     ///// 物体
