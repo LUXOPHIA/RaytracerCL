@@ -6,6 +6,7 @@ uses cl_version, cl_platform, cl,
      LUX,
      LUX.Code.C,
      LUX.GPU.OpenCL.core,
+     LUX.GPU.OpenCL.Argume.Memory,
      LUX.GPU.OpenCL.Argume.Memory.Imager.D1;
 
 type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型】
@@ -22,17 +23,17 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
      TCLImager2D<TCLSystem_,TCLPlatfo_,TCLContex_:class;TValue_:record> = class( TCLImager1D<TCLSystem_,TCLPlatfo_,TCLContex_,TValue_> )
      private
-       type TCLImaDat_ = TCLImaDat2D<TCLSystem_,TCLPlatfo_,TCLContex_,TValue_>;
+       type TCLMemDat_ = TCLMemDat  <TCLSystem_,TCLPlatfo_,TCLContex_>;
+            TCLImaDat_ = TCLImaDat2D<TCLSystem_,TCLPlatfo_,TCLContex_,TValue_>;
      protected
        _CountY :Integer;
        ///// アクセス
+       function NewData :TCLMemDat_; override;
        function GetData :TCLImaDat_; reintroduce; virtual;
        procedure SetData( const Data_:TCLImaDat_ ); reintroduce; virtual;
        function GetMemTyp :T_cl_mem_object_type; override;
        function GetCountY :Integer; override;
        procedure SetCountY( const CountY_:Integer ); override;
-       ///// メソッド
-       function NewData :TObject; override;
      public
        constructor Create; override;
        ///// プロパティ
@@ -79,6 +80,11 @@ implementation //###############################################################
 
 /////////////////////////////////////////////////////////////////////// アクセス
 
+function TCLImager2D<TCLSystem_,TCLPlatfo_,TCLContex_,TValue_>.NewData :TCLMemDat_;
+begin
+     Result := TCLImaDat_.Create( Self );
+end;
+
 function TCLImager2D<TCLSystem_,TCLPlatfo_,TCLContex_,TValue_>.GetData :TCLImaDat_;
 begin
      Result := TCLImaDat_( inherited Data );
@@ -108,13 +114,6 @@ begin
      inherited;
 
      _CountY := CountY_;
-end;
-
-/////////////////////////////////////////////////////////////////////// メソッド
-
-function TCLImager2D<TCLSystem_,TCLPlatfo_,TCLContex_,TValue_>.NewData :TObject;
-begin
-     Result := TCLImaDat_.Create( Self );
 end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
