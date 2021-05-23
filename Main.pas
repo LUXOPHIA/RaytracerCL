@@ -80,8 +80,6 @@ begin
           Add( _Buildr.LinkLog );
           Add( '' );
      end;
-
-     TabControl1.ActiveTab := TabItemP;
 end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
@@ -140,6 +138,8 @@ begin
 
      _Buildr := _Execut.BuildTo( _Device );
 
+     ShowBuild;
+
      if Assigned( _Buildr.Handle ) then
      begin
           _Kernel := _Execut.Kernels.Add( 'Main', _Queuer );
@@ -159,7 +159,7 @@ begin
           if _Kernel.Parames.BindsOK then Timer1.Enabled := True
                                      else TabControl1.ActiveTab := TabItemS;
      end
-     else ShowBuild;
+     else TabControl1.ActiveTab := TabItemP;
 end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
