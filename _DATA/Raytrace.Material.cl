@@ -32,8 +32,9 @@ bool MatMirro( TRay*  const Ray,
                const  THit* Hit,
                uint4* const See )
 {
-  Ray->Pos = Hit->Pos + _EmiShift * Hit->Nor;  // 反射位置
-  Ray->Vec = Reflect( Ray->Vec, Hit->Nor );    // 反射ベクトル
+  Ray->Pos  = Hit->Pos + _EmiShift * Hit->Nor;  // 反射位置
+  Ray->Vec  = Reflect( Ray->Vec, Hit->Nor );    // 反射ベクトル
+  Ray->Wei *= (float3)( 1.0, 0.5, 0.5 );        // 反射色
 
   return ( Random( See ) < 0.5 );  // レイトレーシングの続行
 }
