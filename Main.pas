@@ -197,11 +197,11 @@ end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin
-     _Camera.Storag.Map;
-     _Camera.Storag[ 0 ] := TSingleM4.RotateY( DegToRad( -_MouseC.X ) )
-                          * TSingleM4.RotateX( DegToRad( -_MouseC.Y ) )
-                          * TSingleM4.Translate( 0, 0, 3 );
-     _Camera.Storag.Unmap;
+     _Camera.Data.Map;
+     _Camera.Data[ 0 ] := TSingleM4.RotateY( DegToRad( -_MouseC.X ) )
+                        * TSingleM4.RotateX( DegToRad( -_MouseC.Y ) )
+                        * TSingleM4.Translate( 0, 0, 3 );
+     _Camera.Data.Unmap;
 
      _Kernel.Run;
 
