@@ -73,19 +73,12 @@ procedure TForm1.ShowBuild;
 begin
      with MemoPB.Lines do
      begin
-          if _Buildr.CompileStatus = CL_BUILD_ERROR then
-          begin
-               Add( '▼ Compile' );
-               Add( _Buildr.CompileLog );
-               Add( '' );
-          end;
-
-          if _Buildr.LinkStatus = CL_BUILD_ERROR then
-          begin
-               Add( '▼ Link' );
-               Add( _Buildr.LinkLog );
-               Add( '' );
-          end;
+          Add( '▼ Compile' );
+          Add( _Buildr.CompileLog );
+          Add( '' );
+          Add( '▼ Link' );
+          Add( _Buildr.LinkLog );
+          Add( '' );
      end;
 
      TabControl1.ActiveTab := TabItemP;
@@ -99,9 +92,8 @@ procedure TForm1.MakeContext;
 begin
      _Platfo := TOpenCL.Platfos[ 0 ];
      _Device := _Platfo.Devices[ 0 ];
-     _Contex := _Platfo.Contexs.Add;
-     _Queuer := _Contex.Queuers.Add( _Device );
-
+     _Contex := TCLContex.Create( _Platfo );
+     _Queuer := _Contex.Queuers[ _Device ];
 end;
 
 //------------------------------------------------------------------------------
@@ -143,10 +135,10 @@ begin
           Add.Source.LoadFromFile( '..\..\_DATA\Raytrace.Material.cl' );
      end;
 
-     _Execut := _Contex.Executs.Add;
+     _Execut := TCLExecut.Create( _Contex );
      _Execut.Source.LoadFromFile( '..\..\_DATA\Raytrace.cl' );
 
-     _Buildr := _Execut.Buildrs[ _Device ];
+     _Buildr := _Execut.BuildTo( _Device );
 
      if Assigned( _Buildr.Handle ) then
      begin
