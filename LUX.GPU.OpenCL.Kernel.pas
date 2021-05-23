@@ -96,8 +96,9 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        property FindsOK                       :Boolean    read GetFindsOK write SetFindsOK;
        property BindsOK                       :Boolean    read GetBindsOK write SetBindsOK;
        ///// メソッド
-       function Add( const Name_:String; const Argume_:TCLArgume_ ) :TCLParame_; overload;
        function Contains( const Name_:String ) :Boolean;
+       function Add( const Name_:String ) :TCLParame_; overload;
+       function Add( const Name_:String; const Argume_:TCLArgume_ ) :TCLParame_; overload;
      end;
 
      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TCLKernel<TCLSystem_,TCLPlatfo_,TCLContex_,TCLExecut_>
@@ -169,6 +170,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        constructor Create; override;
        constructor Create( const Execut_:TCLExecut_ ); overload; virtual;
        constructor Create( const Execut_:TCLExecut_; const Name_:String ); overload; virtual;
+       constructor Create( const Execut_:TCLExecut_; const Queuer_:TCLQueuer_ ); overload; virtual;
        constructor Create( const Execut_:TCLExecut_; const Name_:String; const Queuer_:TCLQueuer_ ); overload; virtual;
        destructor Destroy; override;
        ///// プロパティ
@@ -329,14 +331,14 @@ end;
 
 function TCLParames<TCLSystem_,TCLPlatfo_,TCLContex_,TCLExecut_>.GetChildr( const Name_:String ) :TCLParame_;
 begin
-     Result := _NamPars[ Name_ ];
+     if Contains( Name_ ) then Result := _NamPars[ Name_ ]
+                          else Result := Add( Name_ );
 end;
 
 procedure TCLParames<TCLSystem_,TCLPlatfo_,TCLContex_,TCLExecut_>.SetChildr( const Name_:String; const Childr_:TCLParame_ );
 begin
-     if _NamPars.ContainsKey( Name_ ) then _NamPars[ Name_ ].Free;
-
-     _NamPars[ Name_ ] := Childr_;
+     Childr_.Name   := Name_;
+     Childr_.Parent := Self;
 end;
 
 //------------------------------------------------------------------------------
@@ -348,8 +350,7 @@ end;
 
 procedure TCLParames<TCLSystem_,TCLPlatfo_,TCLContex_,TCLExecut_>.SetArgumes( const Name_:String; const Argume_:TCLArgume_ );
 begin
-     if _NamPars.ContainsKey( Name_ ) then _NamPars[ Name_ ].Argume := Argume_
-                                      else Add( Name_, Argume_ );
+     Childrs[ Name_ ].Argume := Argume_;
 end;
 
 //------------------------------------------------------------------------------
@@ -368,7 +369,10 @@ begin
                K := Kernel.KERNEL_ARG_NAME[ I ];
 
                if Contains( K ) then Items[ K ]._ParameI := I
-                                else _FindsOK := False;
+               else
+               begin
+                    _FindsOK := False;  Break;
+               end;
           end;
      end;
 
@@ -389,9 +393,15 @@ var
 begin
      if FindsOK and not _BindsOK then
      begin
-          for A in Self do AssertCL( A.Bind, 'TCLParame.Bind is Error!' );
-
           _BindsOK := True;
+
+          for A in Self do
+          begin
+               if A.Bind <> CL_SUCCESS then
+               begin
+                    _BindsOK := False;  Break;
+               end;
+          end;
      end;
 
      Result := _BindsOK;
@@ -443,16 +453,21 @@ end;
 
 /////////////////////////////////////////////////////////////////////// メソッド
 
-function TCLParames<TCLSystem_,TCLPlatfo_,TCLContex_,TCLExecut_>.Add( const Name_:String; const Argume_:TCLArgume_ ) :TCLParame_;
+function TCLParames<TCLSystem_,TCLPlatfo_,TCLContex_,TCLExecut_>.Contains( const Name_:String ) :Boolean;
 begin
-     Result := TCLParame_.Create( Self, Name_, Argume_ );
+     Result := _NamPars.ContainsKey( Name_ );
 end;
 
 //------------------------------------------------------------------------------
 
-function TCLParames<TCLSystem_,TCLPlatfo_,TCLContex_,TCLExecut_>.Contains( const Name_:String ) :Boolean;
+function TCLParames<TCLSystem_,TCLPlatfo_,TCLContex_,TCLExecut_>.Add( const Name_:String ) :TCLParame_;
 begin
-     Result := _NamPars.ContainsKey( Name_ );
+     Result := TCLParame_.Create( Self, Name_ );
+end;
+
+function TCLParames<TCLSystem_,TCLPlatfo_,TCLContex_,TCLExecut_>.Add( const Name_:String; const Argume_:TCLArgume_ ) :TCLParame_;
+begin
+     Result := TCLParame_.Create( Self, Name_, Argume_ );
 end;
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TCLKernel<TCLSystem_,TCLPlatfo_,TCLContex_,TCLExecut_>
@@ -761,6 +776,13 @@ begin
      _Name := Name_;
 end;
 
+constructor TCLKernel<TCLSystem_,TCLPlatfo_,TCLContex_,TCLExecut_>.Create( const Execut_:TCLExecut_; const Queuer_:TCLQueuer_ );
+begin
+     Create( Execut_ );
+
+     _Queuer := Queuer_;
+end;
+
 constructor TCLKernel<TCLSystem_,TCLPlatfo_,TCLContex_,TCLExecut_>.Create( const Execut_:TCLExecut_; const Name_:String; const Queuer_:TCLQueuer_ );
 begin
      Create( Execut_, Name_ );
@@ -781,7 +803,7 @@ end;
 
 procedure TCLKernel<TCLSystem_,TCLPlatfo_,TCLContex_,TCLExecut_>.Run;
 begin
-     Parames.BindsOK;
+     Assert( Parames.BindsOK, 'TCLKernel.Parames.BindsOK = False' );
 
      AssertCL( clEnqueueNDRangeKernel( Queuer.Handle, Handle,
                                        GloDimN, @_GloMin, @_GloSiz, nil,

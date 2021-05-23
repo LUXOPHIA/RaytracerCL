@@ -2,7 +2,8 @@
 
 interface //#################################################################### ■
 
-uses cl_version, cl_platform, cl,
+uses System.Generics.Collections,
+     cl_version, cl_platform, cl,
      LUX.Data.List,
      LUX.Code.C,
      LUX.GPU.OpenCL.core,
@@ -29,6 +30,8 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        ///// アクセス
        function GetHandle :T_cl_command_queue;
        procedure SetHandle( const Handle_:T_cl_command_queue );
+       function GetDevice :TCLDevice_;
+       procedure SetDevice( const Device_:TCLDevice_ );
        ///// メソッド
        function CreateHandle :T_cl_int; virtual;
        function DestroHandle :T_cl_int; virtual;
@@ -39,21 +42,33 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        ///// プロパティ
        property Contex  :TCLContex_         read GetOwnere                ;
        property Queuers :TCLQueuers_        read GetParent                ;
-       property Device  :TCLDevice_         read   _Device                ;
        property Handle  :T_cl_command_queue read GetHandle write SetHandle;
+       property Device  :TCLDevice_         read GetDevice write SetDevice;
      end;
 
      //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TCLQueuers<TCLSystem_,TCLPlatfo_,TCLContex_>
 
      TCLQueuers<TCLSystem_,TCLPlatfo_,TCLContex_:class> = class( TListParent<TCLContex_,TCLQueuer<TCLSystem_,TCLPlatfo_,TCLContex_>> )
      private
-       type TCLDevice_ = TCLDevice<TCLSystem_,TCLPlatfo_>;
-            TCLQueuer_ = TCLQueuer<TCLSystem_,TCLPlatfo_,TCLContex_>;
+       type TCLDevice_  = TCLDevice<TCLSystem_,TCLPlatfo_>;
+            TCLQueuer_  = TCLQueuer<TCLSystem_,TCLPlatfo_,TCLContex_>;
+            TCLDevQues_ = TDictionary<TCLDevice_,TCLQueuer_>;
      protected
+       _DevQues :TCLDevQues_;
+       ///// アクセス
+       function GetQueuers( const Device_:TCLDevice_ ) :TCLQueuer_;
+       procedure SetQueuers( const Device_:TCLDevice_; const Queuer_:TCLQueuer_ );
+       ///// イベント
+       procedure OnInsertChild( const Childr_:TCLQueuer_ ); override;
+       procedure OnRemoveChild( const Childr_:TCLQueuer_ ); override;
      public
+       constructor Create; override;
+       destructor Destroy; override;
        ///// プロパティ
-       property Contex :TCLContex_ read GetOwnere;
+       property Contex                              :TCLContex_ read GetOwnere                  ;
+       property Queuers[ const Device_:TCLDevice_ ] :TCLQueuer_ read GetQueuers write SetQueuers; default;
        ///// メソッド
+       function Contains( const Device_:TCLDevice_ ) :Boolean;
        function Add( const Device_:TCLDevice_ ) :TCLQueuer_; overload;
        function GetDeviceIDs :TArray<T_cl_device_id>;
      end;
@@ -92,6 +107,20 @@ begin
      if Assigned( _Handle ) then AssertCL( DestroHandle, 'TCLQueuer.DestroHandle is Error!' );
 
      _Handle := Handle_;
+end;
+
+//------------------------------------------------------------------------------
+
+function TCLQueuer<TCLSystem_,TCLPlatfo_,TCLContex_>.GetDevice :TCLDevice_;
+begin
+     Result := _Device;
+end;
+
+procedure TCLQueuer<TCLSystem_,TCLPlatfo_,TCLContex_>.SetDevice( const Device_:TCLDevice_ );
+begin
+     _Device := Device_;
+
+     Handle := nil;
 end;
 
 /////////////////////////////////////////////////////////////////////// メソッド
@@ -149,9 +178,62 @@ end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
 
+/////////////////////////////////////////////////////////////////////// アクセス
+
+function TCLQueuers<TCLSystem_,TCLPlatfo_,TCLContex_>.GetQueuers( const Device_:TCLDevice_ ) :TCLQueuer_;
+begin
+     if Contains( Device_ ) then Result := _DevQues[ Device_ ]
+                            else Result := Add( Device_ );
+end;
+
+procedure TCLQueuers<TCLSystem_,TCLPlatfo_,TCLContex_>.SetQueuers( const Device_:TCLDevice_; const Queuer_:TCLQueuer_ );
+begin
+     Queuer_.Device := Device_;
+     Queuer_.Parent := Self;
+end;
+
+/////////////////////////////////////////////////////////////////////// イベント
+
+procedure TCLQueuers<TCLSystem_,TCLPlatfo_,TCLContex_>.OnInsertChild( const Childr_:TCLQueuer_ );
+begin
+     inherited;
+
+     if Contains( Childr_.Device ) then _DevQues[ Childr_.Device ].Free;
+
+     _DevQues.Add( Childr_.Device, Childr_ );
+end;
+
+procedure TCLQueuers<TCLSystem_,TCLPlatfo_,TCLContex_>.OnRemoveChild( const Childr_:TCLQueuer_ );
+begin
+     inherited;
+
+     _DevQues.Remove( Childr_.Device );
+end;
+
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
 
+constructor TCLQueuers<TCLSystem_,TCLPlatfo_,TCLContex_>.Create;
+begin
+     inherited;
+
+     _DevQues := TCLDevQues_.Create;
+end;
+
+destructor TCLQueuers<TCLSystem_,TCLPlatfo_,TCLContex_>.Destroy;
+begin
+     _DevQues.Free;
+
+     inherited;
+end;
+
 /////////////////////////////////////////////////////////////////////// メソッド
+
+function TCLQueuers<TCLSystem_,TCLPlatfo_,TCLContex_>.Contains( const Device_:TCLDevice_ ) :Boolean;
+begin
+     Result := _DevQues.ContainsKey( Device_ );
+end;
+
+//------------------------------------------------------------------------------
 
 function TCLQueuers<TCLSystem_,TCLPlatfo_,TCLContex_>.Add( const Device_:TCLDevice_ ) :TCLQueuer_;
 begin
