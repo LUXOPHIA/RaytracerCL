@@ -80,6 +80,11 @@ begin
           Add( _Buildr.LinkLog );
           Add( '' );
      end;
+
+     if ( _Buildr.CompileLog = '' ) and
+        ( _Buildr.LinkLog    = '' ) then Exit;
+
+     TabControl1.ActiveTab := TabItemP;
 end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
@@ -136,16 +141,9 @@ begin
      _Execut := TCLExecut.Create( _Contex );
      _Execut.Source.LoadFromFile( '..\..\_DATA\Raytrace.cl' );
 
-     _Buildr := _Execut.BuildTo( _Device );
+     _Buildr := _Execut.Buildrs[ _Device ];
 
-     ShowBuild;
-
-     if not Assigned( _Buildr.Handle ) then
-     begin
-          TabControl1.ActiveTab := TabItemP;
-
-          Exit;
-     end;
+     if not Assigned( _Buildr.Handle ) then Exit; { _Buildr is Error! }
 
      _Kernel := _Execut.Kernels.Add( 'Main', _Queuer );
 
@@ -179,6 +177,8 @@ begin
      MakeArguments;
 
      MakePrograms;
+
+     ShowBuild;
 
      TOpenCL.Show( MemoS.Lines );
 end;
