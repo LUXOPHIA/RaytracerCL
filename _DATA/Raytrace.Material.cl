@@ -36,7 +36,7 @@ bool MatMirro( TRay*  const Ray,
   Ray->Vec  = Reflect( Ray->Vec, Hit->Nor );    // 反射ベクトル
   Ray->Wei *= (float3)( 1.0, 0.5, 0.5 );        // 反射色
 
-  return ( Random( See ) < 0.5 );  // レイトレーシングの続行
+  return ( Rand( See ) < 0.5 );  // レイトレーシングの続行
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MatMirror
@@ -64,7 +64,7 @@ bool MatWater( TRay*  const Ray,
 
   F = Fresnel( Ray->Vec, Nor, IOR0, IOR1 );
 
-  if ( Random( See ) < F )
+  if ( Rand( See ) < F )
   {
     Ray->Vec = Reflect( Ray->Vec, Nor );
     Ray->Pos = Hit->Pos + _EmiShift * Nor;

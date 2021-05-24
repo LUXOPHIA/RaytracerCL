@@ -48,7 +48,7 @@ uint rotl( const uint x, const int k )
   return ( x << k ) | ( x >> ( 32 - k ) );
 }
 
-float Random( uint4* const See )
+float Rand( uint4* const See )
 {
   const uint Result = rotl( See->x * 5, 7 ) * 9;
 
