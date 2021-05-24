@@ -151,15 +151,15 @@ begin
 
      Assert( Assigned( _Kernel.Handle ), '_Kernel is Error!' );
 
+     _Kernel.GloSizX := _Imager.CountX;
+     _Kernel.GloSizY := _Imager.CountY;
+
      _Kernel.Parames['Imager'] := _Imager;
      _Kernel.Parames['Seeder'] := _Seeder;
      _Kernel.Parames['Accumr'] := _Accumr;
      _Kernel.Parames['Camera'] := _Camera;
      _Kernel.Parames['Textur'] := _Textur;
      _Kernel.Parames['Samplr'] := _Samplr;
-
-     _Kernel.GloSizX := _Imager.CountX;
-     _Kernel.GloSizY := _Imager.CountY;
 
      Assert( _Kernel.Parames.FindsOK, '_Kernel.Parames.FindsOK is Error!' );
      Assert( _Kernel.Parames.BindsOK, '_Kernel.Parames.BindsOK is Error!' );
