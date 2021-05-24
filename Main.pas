@@ -140,26 +140,31 @@ begin
 
      ShowBuild;
 
-     if Assigned( _Buildr.Handle ) then
+     if not Assigned( _Buildr.Handle ) then
      begin
-          _Kernel := _Execut.Kernels.Add( 'Main', _Queuer );
+          TabControl1.ActiveTab := TabItemP;
 
-          Assert( Assigned( _Kernel.Handle ), '_Kernel is Error!' );
+          Exit;
+     end;
 
-          _Kernel.Parames['Imager'] := _Imager;
-          _Kernel.Parames['Seeder'] := _Seeder;
-          _Kernel.Parames['Accumr'] := _Accumr;
-          _Kernel.Parames['Camera'] := _Camera;
-          _Kernel.Parames['Textur'] := _Textur;
-          _Kernel.Parames['Samplr'] := _Samplr;
+     _Kernel := _Execut.Kernels.Add( 'Main', _Queuer );
 
-          _Kernel.GloSizX := _Imager.CountX;
-          _Kernel.GloSizY := _Imager.CountY;
+     Assert( Assigned( _Kernel.Handle ), '_Kernel is Error!' );
 
-          if _Kernel.Parames.BindsOK then Timer1.Enabled := True
-                                     else TabControl1.ActiveTab := TabItemS;
-     end
-     else TabControl1.ActiveTab := TabItemP;
+     _Kernel.Parames['Imager'] := _Imager;
+     _Kernel.Parames['Seeder'] := _Seeder;
+     _Kernel.Parames['Accumr'] := _Accumr;
+     _Kernel.Parames['Camera'] := _Camera;
+     _Kernel.Parames['Textur'] := _Textur;
+     _Kernel.Parames['Samplr'] := _Samplr;
+
+     _Kernel.GloSizX := _Imager.CountX;
+     _Kernel.GloSizY := _Imager.CountY;
+
+     Assert( _Kernel.Parames.FindsOK, '_Kernel.Parames.FindsOK is Error!' );
+     Assert( _Kernel.Parames.BindsOK, '_Kernel.Parames.BindsOK is Error!' );
+
+     Timer1.Enabled := True;
 end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
