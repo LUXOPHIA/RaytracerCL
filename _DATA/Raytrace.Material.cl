@@ -32,11 +32,10 @@ bool MatMirro( TRay*  const Ray,
                const  THit* Hit,
                uint4* const See )
 {
-  Ray->Pos  = Hit->Pos + _EmiShift * Hit->Nor;  // 反射位置
-  Ray->Vec  = Reflect( Ray->Vec, Hit->Nor );    // 反射ベクトル
-  Ray->Wei *= (float3)( 1.0, 0.5, 0.5 );        // 反射色
+  Ray->Pos = Hit->Pos;                       // 反射位置
+  Ray->Vec = Reflect( Ray->Vec, Hit->Nor );  // 反射ベクトル
 
-  return ( Rand( See ) < 0.5 );  // レイトレーシングの続行
+  return true;  // レイトレーシングの続行
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MatMirror
@@ -64,14 +63,10 @@ bool MatWater( TRay*  const Ray,
 
   F = Fresnel( Ray->Vec, Nor, IOR0, IOR1 );
 
-  if ( Rand( See ) < F )
-  {
-    Ray->Vec = Reflect( Ray->Vec, Nor );
-    Ray->Pos = Hit->Pos + _EmiShift * Nor;
-  } else {
-    Ray->Vec = Refract( Ray->Vec, Nor, IOR0, IOR1 );
-    Ray->Pos = Hit->Pos - _EmiShift * Nor;
-  }
+  Ray->Pos = Hit->Pos;
+
+  if ( Rand( See ) < F ) Ray->Vec = Reflect( Ray->Vec, Nor             );  // 反射
+                    else Ray->Vec = Refract( Ray->Vec, Nor, IOR0, IOR1 );  // 屈折
 
   return true;
 }
