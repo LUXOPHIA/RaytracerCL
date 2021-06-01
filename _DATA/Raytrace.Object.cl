@@ -11,45 +11,46 @@
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ObjGround
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ObjPlain
 // 地面
 
 bool ObjPlain( const TRay* Ray,
                TTap* const Tap )
 {
+  const float Z = -1;
+
   if ( 0 <= Ray->Vec.y ) return false;  // 交差なし
 
-  float t = ( Ray->Pos.y - -1.001 ) / -Ray->Vec.y;
+  Tap->Dis = ( Z - Ray->Pos.y ) / Ray->Vec.y;
 
-  if ( t <= 0 ) return false;  // 交差なし
+  if ( Tap->Dis <= 0 ) return false;  // 交差なし
 
-  Tap->Dis = t;
-  Tap->Pos = Ray->Pos + t * Ray->Vec;
+  Tap->Pos = Tap->Dis * Ray->Vec + Ray->Pos;
   Tap->Nor = (float3)( 0, 1, 0 );
 
   return true;  // 交差あり
 }
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ObjSphere
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ObjSpher
 // 球体
 
 bool ObjSpher( const TRay* Ray,
                TTap* const Tap )
 {
-  float B = dot( Ray->Pos, Ray->Vec );
-  float C = Length2( Ray->Pos ) - 1;
+  const float R = 1;
 
+  float B = dot( Ray->Pos, Ray->Vec );
+  float C = Length2( Ray->Pos ) - Pow2( R );
   float D = Pow2( B ) - C;
 
   if ( D <= 0 ) return false;  // 交差なし
 
-  float t = -B - sign( C ) * sqrt( D );
+  Tap->Dis = -B - sign( C ) * sqrt( D );
 
-  if ( t <= 0 ) return false;  // 交差なし
+  if ( Tap->Dis <= 0 ) return false;  // 交差なし
 
-  Tap->Dis = t;
-  Tap->Pos = Ray->Pos + t * Ray->Vec;
-  Tap->Nor = Tap->Pos;
+  Tap->Pos = Tap->Dis * Ray->Vec + Ray->Pos;
+  Tap->Nor = Tap->Pos / R;
 
   return true;  // 交差あり
 }
