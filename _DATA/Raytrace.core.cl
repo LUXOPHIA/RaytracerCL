@@ -94,23 +94,24 @@ float3 Reflect( const float3 RayV,
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Fresnel
+// フレネル反射率
 
 float Fresnel( const float3 RayV,
                const float3 NorV,
                const float  IOR0,
                const float  IOR1 )
 {
-  float C = dot( RayV, NorV );
-
+  float N   = IOR1 / IOR0;
+  float N2  = Pow2( N );
+  float C   = dot( -RayV, +NorV );
   float C2  = Pow2( C );
-  float I2  = Pow2( IOR1/IOR0 );
-  float CI2 = C * I2;
-  float G   = sqrt( C2 + I2 - 1 );
-  return ( Pow2( ( C   + G ) / ( C   - G ) )         // (G+C)/(G-C)
-         + Pow2( ( CI2 + G ) / ( CI2 - G ) ) ) / 2;
-
-  // float R0 = Pow2( ( IOR0 - IOR1 ) / ( IOR0 + IOR1 ) );
-  // return R0 + ( 1 - R0 ) * pow( 1 + C, 5 );
+  float S2  = 1  - C2;
+  float G2  = N2 - S2;
+  if ( G2 <= 0 ) return 1;
+  float G   = sqrt( G2 );
+  float N2C = N2 * C;
+  return ( Pow2( (   C - G ) / (   C + G ) )
+         + Pow2( ( N2C - G ) / ( N2C + G ) ) ) / 2;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Refract
@@ -121,12 +122,15 @@ float3 Refract( const float3 RayV,
                 const float  IOR0,
                 const float  IOR1 )
 {
-  float C  = dot( RayV, NorV );
-  float C2  = Pow2( C );
-  float I2 = Pow2( IOR1/IOR0 );
-  float G  = sqrt( C2 + I2 - 1 );
-
-  return IOR0/IOR1 * ( RayV - ( C + G ) * NorV );
+  float N  = IOR1 / IOR0;
+  float N2 = Pow2( N );
+  float C  = dot( -RayV, +NorV );
+  float C2 = Pow2( C );
+  float S2 = 1  - C2;
+  float G2 = N2 - S2;
+  if ( G2 <= 0 ) return (float3)0;
+  float G  = sqrt( G2 );
+  return ( RayV + ( C - G ) * NorV ) / N;
 }
 
 //############################################################################## ■
