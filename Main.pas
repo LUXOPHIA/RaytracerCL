@@ -9,7 +9,9 @@ uses
   cl_version, cl_platform, cl,
   LUX, LUX.D1, LUX.D2, LUX.D3, LUX.D4, LUX.D4x4,
   LUX.GPU.OpenCL,
-  LUX.GPU.OpenCL.FMX;
+  LUX.GPU.OpenCL.Argume.Seeder,
+  LUX.GPU.OpenCL.Stream.FMX.D2,
+  LUX.GPU.OpenCL.Stream.HDR.D2;
 
 type
   TForm1 = class(TForm)
@@ -41,10 +43,12 @@ type
     _Contex :TCLContex;
     _Queuer :TCLQueuer;
     _Imager :TCLImager2DxBGRAxUFix8;
+    _ImaFMX :ICLStream2DxBGRAxUFix8_FMX;
     _Seeder :TCLSeeder2D;
     _Accumr :TCLImager2DxRGBAxSFlo32;
     _Camera :TCLBuffer<TSingleM4>;
     _Textur :TCLImager2DxRGBAxSFlo32;
+    _TexHDR :ICLStream2DxRGBAxSFlo32_HDR;
     _Samplr :TCLSamplr;
     _Execut :TCLExecut;
     _Buildr :TCLBuildr;
@@ -107,6 +111,8 @@ begin
      _Imager.CountX := 800;
      _Imager.CountY := 600;
 
+     _ImaFMX := TCLStream2DxBGRAxUFix8_FMX.Create( _Imager );
+
      _Seeder := TCLSeeder2D.Create( _Contex, _Queuer );
      _Seeder.CountX := _Imager.CountX;
      _Seeder.CountY := _Imager.CountY;
@@ -119,7 +125,9 @@ begin
      _Camera.Count := 1;
 
      _Textur := TCLImager2DxRGBAxSFlo32.Create( _Contex, _Queuer );
-     _Textur.LoadFromFileHDR( '..\..\_DATA\Luxo-Jr_2000x1000.hdr' );
+
+     _TexHDR := TCLStream2DxRGBAxSFlo32_HDR.Create( _Textur );
+     _TexHDR.LoadFromFile( '..\..\_DATA\Luxo-Jr_2000x1000.hdr' );
 
      _Samplr := TCLSamplr.Create( _Contex );
 end;
@@ -202,7 +210,7 @@ begin
 
      _Kernel.Run;
 
-     _Imager.CopyTo( Image1.Bitmap );
+     _ImaFMX.CopyTo( Image1.Bitmap );
 end;
 
 //------------------------------------------------------------------------------
