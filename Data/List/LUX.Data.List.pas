@@ -75,7 +75,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
      TListChildr<TOwnere_,TParent_:class> = class( TListChildr<TParent_> )
      private
-       type TListChildr_ = TListChildr<TOwnere_,TParent_    >;
+       type TListChildr_ = TListChildr<TParent_>;
             TListParent_ = TListParent<TOwnere_,TListChildr_>;
      protected
        ///// アクセス
