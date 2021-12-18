@@ -1397,7 +1397,9 @@ type T_cl_double16 = record
 //}
 //#endif
 
-//#if defined( _WIN32) && defined(_MSC_VER) && ! defined(__STDC__)
+//#if !defined(__cplusplus) && defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+//#elif defined( __GNUC__) && ! defined( __STRICT_ANSI__ )
+//#elif defined( _WIN32) && defined(_MSC_VER) && ! defined(__STDC__)
 //    #if _MSC_VER >=1500
 //    #pragma warning( pop )
 //    #endif
