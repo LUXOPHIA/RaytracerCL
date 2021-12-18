@@ -160,7 +160,7 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        function GetPROGRAM_SCOPE_GLOBAL_DTORS_PRESENT :T_cl_bool ;
        {$ENDIF}
        ///// メソッド
-       function CreateHandle :T_cl_int; virtual; abstract;                      { TODO : E2604 ジェネリック型を再帰的に使用しています @ Delphi 10.3.3 }
+       function CreateHandle :T_cl_int;
        function DestroHandle :T_cl_int; virtual;
      public
        constructor Create; override;
@@ -198,8 +198,6 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
      private
        type TCLLibrars_ = TCLLibrars<TCLSystem_,TCLPlatfo_,TCLContex_>;
      protected
-       ///// メソッド
-       function CreateHandle :T_cl_int; override;
      public
        constructor Create( const Contex_:TCLContex_ ); overload; virtual;
        ///// プロパティ
@@ -220,7 +218,6 @@ type //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
        _Buildrs :TCLBuildrs_;
        _Kernels :TCLKernels_;
        ///// メソッド
-       function CreateHandle :T_cl_int; override;
        function DestroHandle :T_cl_int; override;
      public
        constructor Create; overload; override;
@@ -649,6 +646,15 @@ function TCLProgra<TCLSystem_,TCLPlatfo_,TCLContex_,TCLProgras_>.GetPROGRAM_SCOP
 
 /////////////////////////////////////////////////////////////////////// メソッド
 
+function TCLProgra<TCLSystem_,TCLPlatfo_,TCLContex_,TCLProgras_>.CreateHandle :T_cl_int;
+var
+   C :P_char;
+begin
+     C := P_char( AnsiString( _Source.Text ) );
+
+     _Handle := clCreateProgramWithSource( TCLContex<TCLSystem_,TCLPlatfo_>( Contex ).Handle, 1, @C, nil, @Result );
+end;
+
 function TCLProgra<TCLSystem_,TCLPlatfo_,TCLContex_,TCLProgras_>.DestroHandle :T_cl_int;
 begin
      Result := clReleaseProgram( _Handle );
@@ -682,17 +688,6 @@ end;
 
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
 
-/////////////////////////////////////////////////////////////////////// メソッド
-
-function TCLLibrar<TCLSystem_,TCLPlatfo_,TCLContex_>.CreateHandle :T_cl_int;
-var
-   C :P_char;
-begin
-     C := P_char( AnsiString( _Source.Text ) );
-
-     _Handle := clCreateProgramWithSource( TCLContex<TCLSystem_,TCLPlatfo_>( Contex ).Handle, 1, @C, nil, @Result );
-end;
-
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& public
 
 constructor TCLLibrar<TCLSystem_,TCLPlatfo_,TCLContex_>.Create( const Contex_:TCLContex_ );
@@ -707,15 +702,6 @@ end;
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& protected
 
 /////////////////////////////////////////////////////////////////////// メソッド
-
-function TCLExecut<TCLSystem_,TCLPlatfo_,TCLContex_>.CreateHandle :T_cl_int;
-var
-   C :P_char;
-begin
-     C := P_char( AnsiString( _Source.Text ) );
-
-     _Handle := clCreateProgramWithSource( TCLContex<TCLSystem_,TCLPlatfo_>( Contex ).Handle, 1, @C, nil, @Result );
-end;
 
 function TCLExecut<TCLSystem_,TCLPlatfo_,TCLContex_>.DestroHandle :T_cl_int;
 begin
