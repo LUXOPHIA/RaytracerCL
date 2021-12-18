@@ -745,8 +745,19 @@ typedef cl_bitfield         cl_device_integer_dot_product_capabilities_khr;
 #define CL_DEVICE_INTEGER_DOT_PRODUCT_INPUT_4x8BIT_PACKED_KHR (1 << 0)
 #define CL_DEVICE_INTEGER_DOT_PRODUCT_INPUT_4x8BIT_KHR      (1 << 1)
 
+typedef struct _cl_device_integer_dot_product_acceleration_properties_khr {
+    cl_bool signed_accelerated;
+    cl_bool unsigned_accelerated;
+    cl_bool mixed_signedness_accelerated;
+    cl_bool accumulating_saturating_signed_accelerated;
+    cl_bool accumulating_saturating_unsigned_accelerated;
+    cl_bool accumulating_saturating_mixed_signedness_accelerated;
+} cl_device_integer_dot_product_acceleration_properties_khr;
+
 /* cl_device_info */
-#define CL_DEVICE_INTEGER_DOT_PRODUCT_CAPABILITIES_KHR      0x1073
+#define CL_DEVICE_INTEGER_DOT_PRODUCT_CAPABILITIES_KHR                          0x1073
+#define CL_DEVICE_INTEGER_DOT_PRODUCT_ACCELERATION_PROPERTIES_8BIT_KHR          0x1074
+#define CL_DEVICE_INTEGER_DOT_PRODUCT_ACCELERATION_PROPERTIES_4x8BIT_PACKED_KHR 0x1075
 
 
 /**********************************
@@ -1004,6 +1015,27 @@ typedef cl_uint cl_command_termination_reason_arm;
 #define cl_intel_thread_local_exec 1
 
 #define CL_QUEUE_THREAD_LOCAL_EXEC_ENABLE_INTEL      (((cl_bitfield)1) << 31)
+
+/***************************************************************
+* cl_intel_device_attribute_query
+***************************************************************/
+
+#define cl_intel_device_attribute_query 1
+
+typedef cl_bitfield         cl_device_feature_capabilities_intel;
+
+/* cl_device_feature_capabilities_intel */
+#define CL_DEVICE_FEATURE_FLAG_DP4A_INTEL                   (1 << 0)
+#define CL_DEVICE_FEATURE_FLAG_DPAS_INTEL                   (1 << 1)
+
+/* cl_device_info */
+#define CL_DEVICE_IP_VERSION_INTEL                          0x4250
+#define CL_DEVICE_ID_INTEL                                  0x4251
+#define CL_DEVICE_NUM_SLICES_INTEL                          0x4252
+#define CL_DEVICE_NUM_SUB_SLICES_PER_SLICE_INTEL            0x4253
+#define CL_DEVICE_NUM_EUS_PER_SUB_SLICE_INTEL               0x4254
+#define CL_DEVICE_NUM_THREADS_PER_EU_INTEL                  0x4255
+#define CL_DEVICE_FEATURE_CAPABILITIES_INTEL                0x4256
 
 /***********************************************
 * cl_intel_device_partition_by_names extension *
@@ -1714,6 +1746,11 @@ typedef struct _cl_queue_family_properties_intel {
 #define CL_QUEUE_CAPABILITY_MARKER_INTEL                    (1 << 24)
 #define CL_QUEUE_CAPABILITY_BARRIER_INTEL                   (1 << 25)
 #define CL_QUEUE_CAPABILITY_KERNEL_INTEL                    (1 << 26)
+
+/***************************************************************
+* cl_intel_sharing_format_query
+***************************************************************/
+#define cl_intel_sharing_format_query 1
 
 #ifdef __cplusplus
 }
