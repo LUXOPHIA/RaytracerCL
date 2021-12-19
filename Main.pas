@@ -9,7 +9,6 @@ uses
   cl_version, cl_platform, cl,
   LUX, LUX.D1, LUX.D2, LUX.D3, LUX.D4, LUX.D4x4,
   LUX.GPU.OpenCL,
-  LUX.GPU.OpenCL.Argume.Seeder,
   LUX.GPU.OpenCL.Stream.FMX.D2,
   LUX.GPU.OpenCL.Stream.HDR.D2;
 
@@ -44,8 +43,6 @@ type
     _Queuer :TCLQueuer;
     _Imager :TCLImager2DxBGRAxUFix8;
     _ImaFMX :ICLStream2DxBGRAxUFix8_FMX;
-    _Seeder :TCLSeeder2D;
-    _Accumr :TCLImager2DxRGBAxSFlo32;
     _Camera :TCLBuffer<TSingleM4>;
     _Textur :TCLImager2DxRGBAxSFlo32;
     _TexHDR :ICLStream2DxRGBAxSFlo32_HDR;
@@ -113,14 +110,6 @@ begin
 
      _ImaFMX := TCLStream2DxBGRAxUFix8_FMX.Create( _Imager );
 
-     _Seeder := TCLSeeder2D.Create( _Contex, _Queuer );
-     _Seeder.CountX := _Imager.CountX;
-     _Seeder.CountY := _Imager.CountY;
-
-     _Accumr := TCLImager2DxRGBAxSFlo32.Create( _Contex, _Queuer );
-     _Accumr.CountX := _Imager.CountX;
-     _Accumr.CountY := _Imager.CountY;
-
      _Camera := TCLBuffer<TSingleM4>.Create( _Contex, _Queuer );
      _Camera.Count := 1;
 
@@ -141,19 +130,19 @@ begin
           Add.Source.LoadFromFile( '..\..\_DATA\Math.cl'              );
           Add.Source.LoadFromFile( '..\..\_DATA\Math.D4x4.cl'         );
           Add.Source.LoadFromFile( '..\..\_DATA\Color.cl'             );
-          Add.Source.LoadFromFile( '..\..\_DATA\Raytrace.core.cl'     );
+          Add.Source.LoadFromFile( '..\..\_DATA\Raytracing.cl'     );
           Add.Source.LoadFromFile( '..\..\_DATA\Raytrace.Object.cl'   );
           Add.Source.LoadFromFile( '..\..\_DATA\Raytrace.Material.cl' );
      end;
 
      _Execut := TCLExecut.Create( _Contex );
-     _Execut.Source.LoadFromFile( '..\..\_DATA\Raytrace.cl' );
+     _Execut.Source.LoadFromFile( '..\..\_DATA\Raytracing.Render.cl' );
 
      _Buildr := _Execut.Buildrs[ _Device ];
 
      if not Assigned( _Buildr.Handle ) then Exit; { _Buildr is Error! }
 
-     _Kernel := _Execut.Kernels.Add( 'Main', _Queuer );
+     _Kernel := _Execut.Kernels.Add( 'Render', _Queuer );
 
      Assert( Assigned( _Kernel.Handle ), '_Kernel is Error!' );
 
@@ -161,8 +150,6 @@ begin
      _Kernel.GloSizY := _Imager.CountY;
 
      _Kernel.Parames['Imager'] := _Imager;
-     _Kernel.Parames['Seeder'] := _Seeder;
-     _Kernel.Parames['Accumr'] := _Accumr;
      _Kernel.Parames['Camera'] := _Camera;
      _Kernel.Parames['Textur'] := _Textur;
      _Kernel.Parames['Samplr'] := _Samplr;
@@ -230,8 +217,6 @@ begin
           P := TPointF.Create( X, Y );
           _MouseC := _MouseC + ( P - _MouseP );
           _MouseP := P;
-
-          _Accumr.Fill( TSingleRGBA.Create( 0 ) );
      end;
 end;
 

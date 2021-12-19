@@ -17,7 +17,7 @@ constant float FLOAT_EPS3 = 1.1920928955078125E-4;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% pow2
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pow2
 // pown( X, 2 )
 
 float Pow2( const float X )
@@ -25,7 +25,7 @@ float Pow2( const float X )
   return X * X;
 }
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VecToSky
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Length2
 // Pow2( length( V ) )
 
 float Length2( const float3 V )
@@ -34,7 +34,7 @@ float Length2( const float3 V )
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% VecToSky
-// 変換：ベクトル → 球面座標
+// Unit Vector to Spherical Coordinates
 
 float2 VecToSky( const float3 Vec )
 {
@@ -44,31 +44,6 @@ float2 VecToSky( const float3 Vec )
   Result.y =        acos (  Vec.y           ) / Pi ;
 
   return Result;
-}
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Random
-
-uint rotl( const uint x, const int k )
-{
-  return ( x << k ) | ( x >> ( 32 - k ) );
-}
-
-float Rand( uint4* const See )
-{
-  const uint Result = rotl( See->x * 5, 7 ) * 9;
-
-  const uint t = See->y << 9;
-
-  See->z ^= See->x;
-  See->w ^= See->y;
-  See->y ^= See->z;
-  See->x ^= See->w;
-
-  See->z ^= t;
-
-  See->w = rotl( See->w, 11 );
-
-  return as_float( ( Result & 0x007FFFFFu ) | 0x3F800000u ) - 1;
 }
 
 //############################################################################## ■

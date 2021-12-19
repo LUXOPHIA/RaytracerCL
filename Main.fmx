@@ -56,8 +56,8 @@ object Form1: TForm1
         Size.Height = 600.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
-        Viewport.Width = 796.000000000000000000
-        Viewport.Height = 596.000000000000000000
+        Viewport.Width = 800.000000000000000000
+        Viewport.Height = 600.000000000000000000
       end
     end
     object TabItemP: TTabItem
@@ -87,8 +87,8 @@ object Form1: TForm1
         Size.Height = 600.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 0
-        Viewport.Width = 796.000000000000000000
-        Viewport.Height = 596.000000000000000000
+        Viewport.Width = 800.000000000000000000
+        Viewport.Height = 600.000000000000000000
       end
     end
     object TabItemR: TTabItem
@@ -96,7 +96,7 @@ object Form1: TForm1
         item
         end>
       IsSelected = True
-      Size.Width = 52.000000000000000000
+      Size.Width = 53.000000000000000000
       Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = ''
@@ -115,7 +115,7 @@ object Form1: TForm1
         Margins.Right = 10.000000000000000000
         Margins.Bottom = 10.000000000000000000
         Size.Width = 800.000000000000000000
-        Size.Height = 600.000000000000000000
+        Size.Height = 599.999755859375000000
         Size.PlatformDefault = False
         WrapMode = Stretch
         OnMouseDown = Image1MouseDown
