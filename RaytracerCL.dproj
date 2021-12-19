@@ -262,11 +262,11 @@
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.HDR.D2.pas"/>
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.HDR.D3.pas"/>
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.FMX.D1.pas"/>
-        <None Include="_DATA\Raytrace.cl"/>
+        <None Include="_DATA\Raytracing.Render.cl"/>
         <None Include="_DATA\Raytrace.Material.cl"/>
         <None Include="_DATA\Raytrace.Object.cl"/>
         <None Include="_DATA\Color.cl"/>
-        <None Include="_DATA\Raytrace.core.cl"/>
+        <None Include="_DATA\Raytracing.cl"/>
         <None Include="_DATA\Math.D4x4.cl"/>
         <None Include="_DATA\Math.cl"/>
         <BuildConfiguration Include="Release">
