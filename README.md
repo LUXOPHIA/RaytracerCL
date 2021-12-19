@@ -2,7 +2,7 @@
 
 [OpenCL](https://ja.wikipedia.org/wiki/OpenCL) を用いて、ＧＰＵ上でレイトレーシングする方法。
 
-![](https://github.com/LUXOPHIA/RaytracerCL/raw/master/--------/_SCREENSHOT/RaytracerCL.png)
+![](https://github.com/LUXOPHIA/RaytracerCL/raw/Lesson-01/--------/_SCREENSHOT/RaytracerCL.png)
 
 ----
 
