@@ -1,5 +1,5 @@
-﻿#ifndef RAYTRACE_CORE_CL
-#define RAYTRACE_CORE_CL
+﻿#ifndef RAYTRACING_CORE_CL
+#define RAYTRACING_CORE_CL
 //############################################################################## ■
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型】
