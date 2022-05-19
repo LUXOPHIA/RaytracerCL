@@ -1,5 +1,5 @@
-﻿#ifndef RAYTRACE_MATERIAL_CL
-#define RAYTRACE_MATERIAL_CL
+﻿#ifndef RAYTRACING_MATERIAL_CL
+#define RAYTRACING_MATERIAL_CL
 //############################################################################## ■
 
 #include<Math.cl>
