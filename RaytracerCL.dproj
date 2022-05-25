@@ -198,13 +198,13 @@
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.HDR.D2.pas"/>
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.HDR.D3.pas"/>
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.FMX.D1.pas"/>
-        <None Include="_DATA\Raytracing.Render.cl"/>
         <None Include="_DATA\Raytracing.Material.cl"/>
         <None Include="_DATA\Raytracing.Object.cl"/>
         <None Include="_DATA\Color.cl"/>
-        <None Include="_DATA\Raytracing.cl"/>
         <None Include="_DATA\Math.D4x4.cl"/>
         <None Include="_DATA\Math.cl"/>
+        <None Include="_DATA\Raytracing.cl"/>
+        <None Include="_DATA\Raytracing.Render.cl"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -278,25 +278,25 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="_DATA\Raytrace.cl" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="_DATA\Raytracing.cl" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win64">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="_DATA\Raytrace.core.cl" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="_DATA\Raytracing.Material.cl" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win64">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="_DATA\Raytrace.Material.cl" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="_DATA\Raytracing.Object.cl" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win64">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="_DATA\Raytrace.Object.cl" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="_DATA\Raytracing.Render.cl" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win64">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
