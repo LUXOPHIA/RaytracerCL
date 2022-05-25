@@ -60,12 +60,7 @@ bool ObjSpher( const TRay* Ray,
 
 float GetDis( const float3 P )
 {
-  const float LinR = 1.0f;
-  const float PipR = 1.0f/3.0f;
-
-  float2 Q = { P.x, length( P.yz ) - LinR };
-
-  return length( Q ) - PipR;
+  return length( P ) - 1;
 }
 
 //------------------------------------------------------------------------------
