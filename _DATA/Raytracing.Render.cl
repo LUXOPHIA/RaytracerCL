@@ -48,7 +48,7 @@ void Raytrace( TRay*  const     Ray,
     ///// 物体
 
     if ( ObjPlane( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 1 );  // 地面とレイの交差判定
-    if ( ObjSpher( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 1 );  // 球体とレイの交差判定
+    if ( ObjField( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 1 );  // 球体とレイの交差判定
 
     ///// 材質
 
