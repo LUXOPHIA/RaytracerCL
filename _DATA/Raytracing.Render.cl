@@ -48,7 +48,7 @@ void Raytrace( TRay*  const     Ray,
 
     ///// 物体
 
-    if ( ObjPlane( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 1 );  // 地面とレイの交差判定
+    if ( ObjPlane( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 3 );  // 地面とレイの交差判定
     if ( ObjField( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 2 );  // 球体とレイの交差判定
 
     ///// 材質
@@ -58,6 +58,7 @@ void Raytrace( TRay*  const     Ray,
       case 0: Emi = MatSkyer( Ray, &Hit, See, Tex, Sam ); break;  // 空
       case 1: Emi = MatMirro( Ray, &Hit, See           ); break;  // 鏡面
       case 2: Emi = MatWater( Ray, &Hit, See           ); break;  // 水面
+      case 3: Emi = MatDiffu( Ray, &Hit, See           ); break;  // 地面
     }
 
     if ( !Emi ) break;  // 放射しなければ終了

@@ -71,5 +71,24 @@ bool MatWater( TRay*  const Ray,
   return true;
 }
 
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MatDiffu
+
+bool MatDiffu( TRay*  const Ray,
+               const  THit* Hit,
+               uint4* const See )
+{
+  Ray->Pos = Hit->Pos;
+
+  Ray->Vec.y = sqrt( Rand( See ) );
+
+  float d = sqrt( 1 - Pow2( Ray->Vec.y ) );
+  float v = Rand( See );
+
+  Ray->Vec.x = d * cos( Pi2 * v );
+  Ray->Vec.z = d * sin( Pi2 * v );
+
+  return true;
+}
+
 //############################################################################## ■
 #endif
