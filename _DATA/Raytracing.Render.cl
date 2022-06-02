@@ -31,6 +31,7 @@ void CheckHit( THit* const Hit,
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Raytrace
 
 void Raytrace( TRay*  const     Ray,
+               uint4* const     See,
                const  image2d_t Tex,
                const  sampler_t Sam )
 {
@@ -48,14 +49,15 @@ void Raytrace( TRay*  const     Ray,
     ///// 物体
 
     if ( ObjPlane( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 1 );  // 地面とレイの交差判定
-    if ( ObjField( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 1 );  // 球体とレイの交差判定
+    if ( ObjField( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 2 );  // 球体とレイの交差判定
 
     ///// 材質
 
     switch( Hit.Mat )  // 材質の選択
     {
-      case 0: Emi = MatSkyer( Ray, &Hit, Tex, Sam ); break;  // 空
-      case 1: Emi = MatMirro( Ray, &Hit           ); break;  // 鏡面
+      case 0: Emi = MatSkyer( Ray, &Hit, See, Tex, Sam ); break;  // 空
+      case 1: Emi = MatMirro( Ray, &Hit, See           ); break;  // 鏡面
+      case 2: Emi = MatWater( Ray, &Hit, See           ); break;  // 水面
     }
 
     if ( !Emi ) break;  // 放射しなければ終了
@@ -69,9 +71,11 @@ void Raytrace( TRay*  const     Ray,
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Render
 
 kernel void Render( write_only image2d_t  Imager,
-                    global     TSingleM4* Camera,
-                    read_only  image2d_t  Textur,
-                    const      sampler_t  Samplr )
+                  read_write image2d_t  Seeder,
+                  read_write image2d_t  Accumr,
+                  global     TSingleM4* Camera,
+                  read_only  image2d_t  Textur,
+                  const      sampler_t  Samplr )
 {
   TPix Pix;
   TEye Eye;
@@ -79,41 +83,38 @@ kernel void Render( write_only image2d_t  Imager,
   TCam Cam;
   TRay Ray;
 
-  Pix.Siz.x = get_global_size( 0 );  // 画像のピクセル数Ｘ
-  Pix.Siz.y = get_global_size( 1 );  // 画像のピクセル数Ｙ
+  Pix.Siz = (int2)( get_global_size( 0 ), get_global_size( 1 ) );  // 画像のピクセル数
+  Pix.Pos = (int2)( get_global_id  ( 0 ), get_global_id  ( 1 ) );  // ピクセルの整数座標
+  Pix.See = read_imageui( Seeder, Pix.Pos );                       // 乱数シードを取得
+  Pix.Rad = read_imagef ( Accumr, Pix.Pos );                       // ピクセル輝度を取得
 
-  Pix.Pos.x = get_global_id( 0 );  // ピクセルの整数座標Ｘ
-  Pix.Pos.y = get_global_id( 1 );  // ピクセルの整数座標Ｙ
+  Eye.Pos = (float3)0;  // 視点位置
 
-  Eye.Pos.x = 0;  // 視点位置Ｘ
-  Eye.Pos.y = 0;  // 視点位置Ｙ
-  Eye.Pos.z = 0;  // 視点位置Ｚ
-
-  Scr.Siz.x = 4;  // スクリーンのサイズＸ
-  Scr.Siz.y = 3;  // スクリーンのサイズＹ
-
-  Scr.Pos.x = Scr.Siz.x * ( ( Pix.Pos.x + 0.5 ) / Pix.Siz.x - 0.5 );  // スクリーン上の標本位置Ｘ
-  Scr.Pos.y = Scr.Siz.y * ( 0.5 - ( Pix.Pos.y + 0.5 ) / Pix.Siz.y );  // スクリーン上の標本位置Ｙ
-  Scr.Pos.z = -2;                                                     // スクリーン上の標本位置Ｚ
+  Scr.Siz   = (float2)( 4, 3 );                                       // スクリーンのサイズ
+  Scr.Pos.x = Scr.Siz.x * ( ( Pix.Pos.x + 0.5 ) / Pix.Siz.x - 0.5 );  // スクリーン上の標本位置
+  Scr.Pos.y = Scr.Siz.y * ( 0.5 - ( Pix.Pos.y + 0.5 ) / Pix.Siz.y );
+  Scr.Pos.z = -2;
 
   Cam.Mov = Camera[0];  // カメラの姿勢
 
-  Ray.Pos   = MulPos( Cam.Mov, Eye.Pos );                         // レイの出射位置
-  Ray.Vec   = MulVec( Cam.Mov, normalize( Scr.Pos - Eye.Pos ) );  // レイのベクトル
-  Ray.Wei.x = 1;                                                  // レイのウェイトＲ
-  Ray.Wei.y = 1;                                                  // レイのウェイトＧ
-  Ray.Wei.z = 1;                                                  // レイのウェイトＢ
-  Ray.Rad.x = 0;                                                  // レイの輝度Ｒ
-  Ray.Rad.y = 0;                                                  // レイの輝度Ｇ
-  Ray.Rad.z = 0;                                                  // レイの輝度Ｂ
+  for ( int N = 1; N <= 16; N++ )
+  {
+    Ray.Pos = MulPos( Cam.Mov, Eye.Pos );                         // レイの出射位置
+    Ray.Vec = MulVec( Cam.Mov, normalize( Scr.Pos - Eye.Pos ) );  // レイのベクトル
+    Ray.Wei = (float3)1;                                          // レイのウェイト
+    Ray.Rad = (float3)0;                                          // レイの輝度
 
-  Raytrace( &Ray, Textur, Samplr );  // レイトレーシング
+    Raytrace( &Ray, &Pix.See, Textur, Samplr );  // レイトレーシング
 
-  Pix.Rad.xyz = Ray.Wei * Ray.Rad;  // ピクセル輝度
+    Pix.Rad.w   += 1;                                                // 標本数
+    Pix.Rad.xyz += ( Ray.Wei * Ray.Rad - Pix.Rad.xyz ) / Pix.Rad.w;  // ピクセル輝度
+  }
 
-  Pix.Col = GammaCorrect( ToneMap( Pix.Rad, 100 ), 2.2 );  // ピクセル色
+  Pix.Col = GammaCorrect( ToneMap( Pix.Rad.xyz, 100 ), 2.2 );  // ピクセル色
 
-  write_imagef( Imager, Pix.Pos, (float4)( Pix.Col, 1 ) );  // ピクセル色を保存
+  write_imagef ( Accumr, Pix.Pos,           Pix.Rad      );  // ピクセル輝度を保存
+  write_imageui( Seeder, Pix.Pos,           Pix.See      );  // 乱数シードを保存
+  write_imagef ( Imager, Pix.Pos, (float4)( Pix.Col, 1 ) );  // ピクセル色を保存
 }
 
 //############################################################################## ■

@@ -17,7 +17,7 @@ constant float FLOAT_EPS3 = 1.1920928955078125E-4;
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【ルーチン】
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Pow2
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% pow2
 // pown( X, 2 )
 
 float Pow2( const float X )
@@ -46,5 +46,31 @@ float2 VecToSky( const float3 Vec )
   return Result;
 }
 
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Random
+
+uint rotl( const uint x, const int k )
+{
+  return ( x << k ) | ( x >> ( 32 - k ) );
+}
+
+float Rand( uint4* const See )
+{
+  const uint Result = rotl( See->x * 5, 7 ) * 9;
+
+  const uint t = See->y << 9;
+
+  See->z ^= See->x;
+  See->w ^= See->y;
+  See->y ^= See->z;
+  See->x ^= See->w;
+
+  See->z ^= t;
+
+  See->w = rotl( See->w, 11 );
+
+  return as_float( ( Result & 0x007FFFFFu ) | 0x3F800000u ) - 1;
+}
+
 //############################################################################## ■
 #endif
+

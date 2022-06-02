@@ -60,6 +60,8 @@ bool ObjSpher( const TRay* Ray,
 
 float GetDis( const float3 P )
 {
+
+
   return length( P ) - 1;
 }
 
