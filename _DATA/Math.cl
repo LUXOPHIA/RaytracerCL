@@ -46,7 +46,7 @@ float2 VecToSky( const float3 Vec )
   return Result;
 }
 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Random
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Rand
 
 uint rotl( const uint x, const int k )
 {
@@ -69,6 +69,16 @@ float Rand( uint4* const See )
   See->w = rotl( See->w, 11 );
 
   return as_float( ( Result & 0x007FFFFFu ) | 0x3F800000u ) - 1;
+}
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% RandCirc
+
+float2 RandCirc( uint4* const See )
+{
+  float T = Pi2 * Rand( See );
+  float R = sqrt( Rand( See ) );
+
+  return R * (float2)( cos( T ), sin( T ) );
 }
 
 //############################################################################## ■
