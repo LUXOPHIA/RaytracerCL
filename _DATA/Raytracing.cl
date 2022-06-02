@@ -11,7 +11,8 @@ typedef struct
 {
   int2   Siz;  // 総数
   int2   Pos;  // 位置
-  float3 Rad;  // 輝度
+  uint4  See;  // 乱数シード
+  float4 Rad;  // 輝度
   float3 Col;  // 色
 }
 TPix;
@@ -134,3 +135,4 @@ float3 Refract( const float3 RayV,
 
 //############################################################################## ■
 #endif
+
