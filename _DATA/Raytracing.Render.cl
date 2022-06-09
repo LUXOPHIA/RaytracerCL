@@ -33,13 +33,14 @@ void CheckHit( THit* const Hit,
 void Raytrace( TRay*  const     Ray,
                uint4* const     See,
                const  image2d_t Tex,
-               const  sampler_t Sam )
+               const  sampler_t Sam,
+               global TShaper*  Shapers )
 {
   THit Hit;
   TTap Tap;
   bool Emi;
 
-  for ( int N = 0; N < 10; N++ )
+  for ( int N = 0; N < 5; N++ )
   {
     Hit.Dis = INFINITY;   // 衝突点までの距離
     Hit.Pos = (float3)0;  // 衝突点の位置
@@ -48,8 +49,12 @@ void Raytrace( TRay*  const     Ray,
 
     ///// 物体
 
-    if ( ObjPlane( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 3 );  // 地面とレイの交差判定
-    if ( ObjField( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 2 );  // 球体とレイの交差判定
+    //if ( ObjPlane( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 3 );  // 地面とレイの交差判定
+
+    for ( int i = 0; i < 100; i++ )
+    {
+      if ( ObjSpher( Ray, &Tap, Shapers[ i ].Mov ) ) CheckHit( &Hit, &Tap, 1 );  // 球体とレイの交差判定
+    }
 
     ///// 材質
 
@@ -71,12 +76,13 @@ void Raytrace( TRay*  const     Ray,
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Render
 
-kernel void Render( write_only image2d_t  Imager,
-                  read_write image2d_t  Seeder,
-                  read_write image2d_t  Accumr,
-                  global     TSingleM4* Camera,
-                  read_only  image2d_t  Textur,
-                  const      sampler_t  Samplr )
+kernel void Render( write_only image2d_t  Imager ,
+                    read_write image2d_t  Seeder ,
+                    read_write image2d_t  Accumr ,
+                    global     TSingleM4* Camera ,
+                    read_only  image2d_t  Textur ,
+                    const      sampler_t  Samplr ,
+                    global     TShaper*   Shapers )
 {
   TPix Pix;
   TEye Eye;
@@ -89,23 +95,26 @@ kernel void Render( write_only image2d_t  Imager,
   Pix.See = read_imageui( Seeder, Pix.Pos );                       // 乱数シードを取得
   Pix.Rad = read_imagef ( Accumr, Pix.Pos );                       // ピクセル輝度を取得
 
-  Eye.Pos = (float3)0;  // 視点位置
+  Eye.Pos = (float3)( RandCirc(&Pix.See) * 0.05f, 0 );  // 視点位置
 
-  Scr.Siz   = (float2)( 4, 3 );                                       // スクリーンのサイズ
-  Scr.Pos.x = Scr.Siz.x * ( ( Pix.Pos.x + 0.5 ) / Pix.Siz.x - 0.5 );  // スクリーン上の標本位置
-  Scr.Pos.y = Scr.Siz.y * ( 0.5 - ( Pix.Pos.y + 0.5 ) / Pix.Siz.y );
+  float2 A = (float2)( Rand(&Pix.See)+Rand(&Pix.See)+Rand(&Pix.See)+Rand(&Pix.See)-2,
+                       Rand(&Pix.See)+Rand(&Pix.See)+Rand(&Pix.See)+Rand(&Pix.See)-2 );
+
+  Scr.Siz   = (float2)( 4, 3 );                                             // スクリーンのサイズ
+  Scr.Pos.x = Scr.Siz.x * ( ( Pix.Pos.x + 0.5 + A.x ) / Pix.Siz.x - 0.5 );  // スクリーン上の標本位置
+  Scr.Pos.y = Scr.Siz.y * ( 0.5 - ( Pix.Pos.y + 0.5 + A.y ) / Pix.Siz.y );
   Scr.Pos.z = -2;
 
   Cam.Mov = Camera[0];  // カメラの姿勢
 
-  for ( int N = 1; N <= 16; N++ )
+  for ( int N = 1; N <= 4; N++ )
   {
     Ray.Pos = MulPos( Cam.Mov, Eye.Pos );                         // レイの出射位置
     Ray.Vec = MulVec( Cam.Mov, normalize( Scr.Pos - Eye.Pos ) );  // レイのベクトル
     Ray.Wei = (float3)1;                                          // レイのウェイト
     Ray.Rad = (float3)0;                                          // レイの輝度
 
-    Raytrace( &Ray, &Pix.See, Textur, Samplr );  // レイトレーシング
+    Raytrace( &Ray, &Pix.See, Textur, Samplr, Shapers );  // レイトレーシング
 
     Pix.Rad.w   += 1;                                                // 標本数
     Pix.Rad.xyz += ( Ray.Wei * Ray.Rad - Pix.Rad.xyz ) / Pix.Rad.w;  // ピクセル輝度
