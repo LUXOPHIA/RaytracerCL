@@ -34,13 +34,21 @@ bool ObjPlane( const TRay* Ray,
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ObjSpher
 // 球体
 
-bool ObjSpher( const TRay* Ray,
-               TTap* const Tap )
+bool ObjSpher( const  TRay* Ray0,
+               TTap*  const Tap,
+               TSingleM4 const Mov )
 {
-  const float R = 1;
+  TRay Ray = *Ray0;
 
-  float B = dot( Ray->Pos, Ray->Vec );
-  float C = Length2( Ray->Pos ) - Pow2( R );
+  TSingleM4 Inv = Inverse( Mov );
+
+  Ray.Pos = MulPos( Inv, Ray.Pos );
+  Ray.Vec = MulVec( Inv, Ray.Vec );
+  float VecL = length( Ray.Vec );  
+  Ray.Vec /= VecL;
+
+  float B = dot( Ray.Pos, Ray.Vec );
+  float C = Length2( Ray.Pos ) - 1;
   float D = Pow2( B ) - C;
 
   if ( D <= 0 ) return false;  // 交差なし
@@ -49,8 +57,12 @@ bool ObjSpher( const TRay* Ray,
 
   if ( Tap->Dis <= 0 ) return false;  // 交差なし
 
-  Tap->Pos = Tap->Dis * Ray->Vec + Ray->Pos;
-  Tap->Nor = Tap->Pos / R;
+  Tap->Pos = Tap->Dis * Ray.Vec + Ray.Pos;
+  Tap->Nor = Tap->Pos;
+
+  Tap->Dis /= VecL;
+  Tap->Pos = MulPos( Mov, Tap->Pos );
+  Tap->Nor = normalize( MulVec( Transpose( Inv ), Tap->Nor ) );
 
   return true;  // 交差あり
 }
