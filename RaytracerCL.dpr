@@ -62,7 +62,8 @@ uses
   LUX.GPU.OpenCL.Stream.HDR.D1 in '_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.HDR.D1.pas',
   LUX.GPU.OpenCL.Stream.HDR.D2 in '_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.HDR.D2.pas',
   LUX.GPU.OpenCL.Stream.HDR.D3 in '_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.HDR.D3.pas',
-  LUX.GPU.OpenCL.Stream.FMX.D1 in '_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.FMX.D1.pas';
+  LUX.GPU.OpenCL.Stream.FMX.D1 in '_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.FMX.D1.pas',
+  Core in 'Core.pas';
 
 {$R *.res}
 
