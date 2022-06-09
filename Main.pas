@@ -11,7 +11,8 @@ uses
   LUX.GPU.OpenCL,
   LUX.GPU.OpenCL.Argume.Seeder,
   LUX.GPU.OpenCL.Stream.FMX.D2,
-  LUX.GPU.OpenCL.Stream.HDR.D2;
+  LUX.GPU.OpenCL.Stream.HDR.D2,
+  Core;
 
 type
   TForm1 = class(TForm)
@@ -38,24 +39,26 @@ type
     procedure ShowBuild;
   public
     { public 宣言 }
-    _Platfo :TCLPlatfo;
-    _Device :TCLDevice;
-    _Contex :TCLContex;
-    _Queuer :TCLQueuer;
-    _Imager :TCLImager2DxBGRAxUFix8;
-    _ImaFMX :ICLStream2DxBGRAxUFix8_FMX;
-    _Seeder :TCLSeeder2D;
-    _Accumr :TCLImager2DxRGBAxSFlo32;
-    _Camera :TCLBuffer<TSingleM4>;
-    _Textur :TCLImager2DxRGBAxSFlo32;
-    _TexHDR :ICLStream2DxRGBAxSFlo32_HDR;
-    _Samplr :TCLSamplr;
-    _Execut :TCLExecut;
-    _Buildr :TCLBuildr;
-    _Kernel :TCLKernel;
+    _Platfo  :TCLPlatfo;
+    _Device  :TCLDevice;
+    _Contex  :TCLContex;
+    _Queuer  :TCLQueuer;
+    _Imager  :TCLImager2DxBGRAxUFix8;
+    _ImaFMX  :ICLStream2DxBGRAxUFix8_FMX;
+    _Seeder  :TCLSeeder2D;
+    _Accumr  :TCLImager2DxRGBAxSFlo32;
+    _Camera  :TCLBuffer<TSingleM4>;
+    _Textur  :TCLImager2DxRGBAxSFlo32;
+    _TexHDR  :ICLStream2DxRGBAxSFlo32_HDR;
+    _Samplr  :TCLSamplr;
+    _Execut  :TCLExecut;
+    _Buildr  :TCLBuildr;
+    _Kernel  :TCLKernel;
+    _Shapers :TCLBuffer<TShaper>;
     ///// メソッド
     procedure MakeContext;
     procedure MakeArguments;
+    procedure MakeShapers;
     procedure MakePrograms;
   end;
 
@@ -130,6 +133,36 @@ begin
      _TexHDR.LoadFromFile( '..\..\_DATA\Luxo-Jr_2000x1000.hdr' );
 
      _Samplr := TCLSamplr.Create( _Contex );
+
+     _Shapers := TCLBuffer<TShaper>.Create( _Contex, _Queuer );
+end;
+
+//------------------------------------------------------------------------------
+
+procedure TForm1.MakeShapers;
+var
+   I :Integer;
+   P :TShaper;
+begin
+     _Shapers.Count := 100;
+
+     _Shapers.Data.Map;
+
+     for I := 0 to _Shapers.Count-1 do
+     begin
+          P.Mov := TSingleM4.Translate( Random + Random + Random + Random - 2,
+                                        Random + Random + Random + Random - 2,
+                                        Random + Random + Random + Random - 2 )
+                 * TSingleM4.RotateY( Random * Pi2 )
+                 * TSingleM4.RotateX( Random * Pi )
+                 * TSingleM4.Scale( Random * 0.16 + 0.02,
+                                    Random * 0.16 + 0.02,
+                                    Random * 0.16 + 0.02 );
+
+          _Shapers.Data[ I ] := P;
+     end;
+
+     _Shapers.Data.Unmap;
 end;
 
 //------------------------------------------------------------------------------
@@ -138,10 +171,12 @@ procedure TForm1.MakePrograms;
 begin
      with _Contex.Librars do
      begin
-          Add.Source.LoadFromFile( '..\..\_DATA\Math.cl'              );
-          Add.Source.LoadFromFile( '..\..\_DATA\Math.D4x4.cl'         );
-          Add.Source.LoadFromFile( '..\..\_DATA\Color.cl'             );
-          Add.Source.LoadFromFile( '..\..\_DATA\Raytracing.cl'     );
+          Add.Source.LoadFromFile( '..\..\_DATA\Math.cl'                );
+          Add.Source.LoadFromFile( '..\..\_DATA\Math.D2x2.cl'           );
+          Add.Source.LoadFromFile( '..\..\_DATA\Math.D3x3.cl'           );
+          Add.Source.LoadFromFile( '..\..\_DATA\Math.D4x4.cl'           );
+          Add.Source.LoadFromFile( '..\..\_DATA\Color.cl'               );
+          Add.Source.LoadFromFile( '..\..\_DATA\Raytracing.cl'          );
           Add.Source.LoadFromFile( '..\..\_DATA\Raytracing.Object.cl'   );
           Add.Source.LoadFromFile( '..\..\_DATA\Raytracing.Material.cl' );
      end;
@@ -160,12 +195,13 @@ begin
      _Kernel.GloSizX := _Imager.CountX;
      _Kernel.GloSizY := _Imager.CountY;
 
-     _Kernel.Parames['Imager'] := _Imager;
-     _Kernel.Parames['Seeder'] := _Seeder;
-     _Kernel.Parames['Accumr'] := _Accumr;
-     _Kernel.Parames['Camera'] := _Camera;
-     _Kernel.Parames['Textur'] := _Textur;
-     _Kernel.Parames['Samplr'] := _Samplr;
+     _Kernel.Parames['Imager' ] := _Imager ;
+     _Kernel.Parames['Seeder' ] := _Seeder ;
+     _Kernel.Parames['Accumr' ] := _Accumr ;
+     _Kernel.Parames['Camera' ] := _Camera ;
+     _Kernel.Parames['Textur' ] := _Textur ;
+     _Kernel.Parames['Samplr' ] := _Samplr ;
+     _Kernel.Parames['Shapers'] := _Shapers;
 
      Assert( _Kernel.Parames.FindsOK, '_Kernel.Parames.FindsOK is Error!' );
      Assert( _Kernel.Parames.BindsOK, '_Kernel.Parames.BindsOK is Error!' );
@@ -181,9 +217,8 @@ begin
      _MouseC := TPointF.Create( -60, +10 );
 
      MakeContext;
-
      MakeArguments;
-
+     MakeShapers;
      MakePrograms;
 
      ShowBuild;
@@ -205,7 +240,7 @@ begin
      _Camera.Data.Map;
      _Camera.Data[ 0 ] := TSingleM4.RotateY( DegToRad( -_MouseC.X ) )
                         * TSingleM4.RotateX( DegToRad( -_MouseC.Y ) )
-                        * TSingleM4.Translate( 0, 0, 3 );
+                        * TSingleM4.Translate( 0, 0, 2 );
      _Camera.Data.Unmap;
 
      _Kernel.Run;
