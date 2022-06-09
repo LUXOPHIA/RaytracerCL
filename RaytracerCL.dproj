@@ -198,6 +198,7 @@
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.HDR.D2.pas"/>
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.HDR.D3.pas"/>
         <DCCReference Include="_LIBRARY\LUXOPHIA\LUX.GPU.OpenCL\Stream\LUX.GPU.OpenCL.Stream.FMX.D1.pas"/>
+        <DCCReference Include="Core.pas"/>
         <None Include="_DATA\Raytracing.Material.cl"/>
         <None Include="_DATA\Raytracing.Object.cl"/>
         <None Include="_DATA\Color.cl"/>
@@ -205,6 +206,8 @@
         <None Include="_DATA\Math.cl"/>
         <None Include="_DATA\Raytracing.cl"/>
         <None Include="_DATA\Raytracing.Render.cl"/>
+        <None Include="_DATA\Math.D3x3.cl"/>
+        <None Include="_DATA\Math.D2x2.cl"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -267,6 +270,18 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="_DATA\Math.cl" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win64">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="_DATA\Math.D2x2.cl" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win64">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="_DATA\Math.D3x3.cl" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win64">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
