@@ -2,6 +2,8 @@
 #define MATH_D4X4_CL
 //############################################################################## ■
 
+#include<Math.D3x3.cl>
+
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$【型】
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TSingleM4
@@ -53,6 +55,8 @@ TSingleM4 __attribute__((overloadable)) Mul( const TSingleM4 A, const TSingleM4 
   return Result;
 }
 
+//------------------------------------------------------------------------------
+
 float4 __attribute__((overloadable)) Mul( const TSingleM4 A, const float4 B )
 {
   float4 Result;
@@ -64,6 +68,8 @@ float4 __attribute__((overloadable)) Mul( const TSingleM4 A, const float4 B )
 
   return Result;
 }
+
+//------------------------------------------------------------------------------
 
 float3 __attribute__((overloadable)) MulPos( const TSingleM4 A, const float3 B )
 {
@@ -77,6 +83,8 @@ float3 __attribute__((overloadable)) MulPos( const TSingleM4 A, const float3 B )
   return Result.xyz / Result.w;
 }
 
+//------------------------------------------------------------------------------
+
 float3 __attribute__((overloadable)) MulVec( const TSingleM4 A, const float3 B )
 {
   float3 Result;
@@ -86,6 +94,131 @@ float3 __attribute__((overloadable)) MulVec( const TSingleM4 A, const float3 B )
   Result.z = A._31 * B.x + A._32 * B.y + A._33 * B.z;
 
   return Result;
+}
+
+//------------------------------------------------------------------------------
+
+TSingleM4 __attribute__((overloadable)) Div( const TSingleM4 A, const float B )
+{
+  TSingleM4 Result;
+
+  Result._11 = A._11 / B;  Result._12 = A._12 / B;  Result._13 = A._13 / B;  Result._14 = A._14 / B;
+  Result._21 = A._21 / B;  Result._22 = A._22 / B;  Result._23 = A._23 / B;  Result._24 = A._24 / B;
+  Result._31 = A._31 / B;  Result._32 = A._32 / B;  Result._33 = A._33 / B;  Result._34 = A._34 / B;
+  Result._41 = A._41 / B;  Result._42 = A._42 / B;  Result._43 = A._43 / B;  Result._44 = A._44 / B;
+
+  return Result;
+}
+
+//------------------------------------------------------------------------------
+
+TSingleM4 __attribute__((overloadable)) Transpose( const TSingleM4 M )
+{
+  TSingleM4 Result;
+
+  Result._11 = M._11;  Result._12 = M._21;  Result._13 = M._31;  Result._14 = M._41;
+  Result._21 = M._12;  Result._22 = M._22;  Result._23 = M._32;  Result._24 = M._42;
+  Result._31 = M._13;  Result._32 = M._23;  Result._33 = M._33;  Result._34 = M._43;
+  Result._41 = M._14;  Result._42 = M._24;  Result._43 = M._34;  Result._44 = M._44;
+
+  return Result;
+}
+
+//------------------------------------------------------------------------------
+
+float __attribute__((overloadable)) Det( const TSingleM4 M )
+{
+  return M._11 * ( M._22 * M._33 - M._23 * M._32 )
+       + M._12 * ( M._23 * M._31 - M._21 * M._33 )
+       + M._13 * ( M._21 * M._32 - M._22 * M._31 );
+}
+
+//------------------------------------------------------------------------------
+
+TSingleM4 __attribute__((overloadable)) Adjugate( const TSingleM4 M )
+{
+  TSingleM4 Result;
+
+  Result._11 = +Det( (TSingleM3){ M._22, M._23, M._24,
+                                  M._32, M._33, M._34,
+                                  M._42, M._43, M._44 } );
+
+  Result._21 = -Det( (TSingleM3){ M._21, M._23, M._24,
+                                  M._31, M._33, M._34,
+                                  M._41, M._43, M._44 } );
+
+  Result._31 = +Det( (TSingleM3){ M._21, M._22, M._24,
+                                  M._31, M._32, M._34,
+                                  M._41, M._42, M._44 } );
+
+  Result._41 = -Det( (TSingleM3){ M._21, M._22, M._23,
+                                  M._31, M._32, M._33,
+                                  M._41, M._42, M._43 } );
+
+
+  Result._12 = -Det( (TSingleM3){ M._12, M._13, M._14,
+                                  M._32, M._33, M._34,
+                                  M._42, M._43, M._44 } );
+
+  Result._22 = +Det( (TSingleM3){ M._11, M._13, M._14,
+                                  M._31, M._33, M._34,
+                                  M._41, M._43, M._44 } );
+
+  Result._32 = -Det( (TSingleM3){ M._11, M._12, M._14,
+                                  M._31, M._32, M._34,
+                                  M._41, M._42, M._44 } );
+
+  Result._42 = +Det( (TSingleM3){ M._11, M._12, M._13,
+                                  M._31, M._32, M._33,
+                                  M._41, M._42, M._43 } );
+
+
+  Result._13 = +Det( (TSingleM3){ M._12, M._13, M._14,
+                                  M._22, M._23, M._24,
+                                  M._42, M._43, M._44 } );
+
+  Result._23 = -Det( (TSingleM3){ M._11, M._13, M._14,
+                                  M._21, M._23, M._24,
+                                  M._41, M._43, M._44 } );
+
+  Result._33 = +Det( (TSingleM3){ M._11, M._12, M._14,
+                                  M._21, M._22, M._24,
+                                  M._41, M._42, M._44 } );
+
+  Result._43 = -Det( (TSingleM3){ M._11, M._12, M._13,
+                                  M._21, M._22, M._23,
+                                  M._41, M._42, M._43 } );
+
+
+  Result._14 = -Det( (TSingleM3){ M._12, M._13, M._14,
+                                  M._22, M._23, M._24,
+                                  M._32, M._33, M._34 } );
+
+  Result._24 = +Det( (TSingleM3){ M._11, M._13, M._14,
+                                  M._21, M._23, M._24,
+                                  M._31, M._33, M._34 } );
+
+  Result._34 = -Det( (TSingleM3){ M._11, M._12, M._14,
+                                  M._21, M._22, M._24,
+                                  M._31, M._32, M._34 } );
+
+  Result._44 = +Det( (TSingleM3){ M._11, M._12, M._13,
+                                  M._21, M._22, M._23,
+                                  M._31, M._32, M._33 } );
+
+  return Result;
+}
+
+//------------------------------------------------------------------------------
+
+TSingleM4 __attribute__((overloadable)) Inverse( const TSingleM4 M )
+{
+  TSingleM4 A = Adjugate( M );
+
+  return Div( A, M._11 * A._11
+               + M._12 * A._21
+               + M._13 * A._31
+               + M._14 * A._41 );
 }
 
 //############################################################################## ■
