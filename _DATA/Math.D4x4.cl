@@ -112,7 +112,7 @@ TSingleM4 __attribute__((overloadable)) Div( const TSingleM4 A, const float B )
 
 //------------------------------------------------------------------------------
 
-TSingleM4 __attribute__((overloadable)) Transpose( const TSingleM4 M )
+TSingleM4 __attribute__((overloadable)) Trans( const TSingleM4 M )
 {
   TSingleM4 Result;
 

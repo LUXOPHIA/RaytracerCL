@@ -62,7 +62,7 @@ bool ObjSpher( const  TRay* Ray0,
 
   Tap->Dis /= VecL;
   Tap->Pos = MulPos( Mov, Tap->Pos );
-  Tap->Nor = normalize( MulVec( Transpose( Inv ), Tap->Nor ) );
+  Tap->Nor = normalize( MulVec( Trans( Inv ), Tap->Nor ) );
 
   return true;  // 交差あり
 }
