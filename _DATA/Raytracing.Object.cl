@@ -14,6 +14,11 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ObjPlain
 // 地面
 
+
+const int MAX_MARCHING_STEPS = 16;
+const float EPSILON = 0.001;
+const float MAX_DIST =
+
 bool ObjPlane( const TRay* Ray,
                TTap* const Tap )
 {
@@ -72,10 +77,51 @@ bool ObjSpher( const  TRay* Ray0,
 
 float GetDis( const float3 P )
 {
-
-
   return length( P ) - 1;
 }
+
+ /**
+ * Signed distance function for a sphere centered at the origin with radius r.
+ */
+float sphereSDF(float3 p, float r) {
+  return length(p) - r;
+}
+
+// polynomial smooth min (k = 0.1);
+float smin( float a, float b, float k )
+{
+  float h = clamp( 0.5+0.5*(b-a)/k, 0.0, 1.0 );
+  return mix( b, a, h ) - k*h*(1.0-h);
+}
+
+float shortestDistanceToSurface(float3 eye, float3 marchingDirection, float start, float end) {
+  float depth = start;
+  for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
+    float dist = sceneSDF(eye + depth * marchingDirection);
+    if (dist < EPSILON) {
+      return depth;
+    }
+    depth += dist;
+    if (depth >= end) {
+      return end;
+    }
+  }
+  return end;
+}
+
+/**
+ * Signed distance function describing the scene.
+ */
+float sceneSDF(float3 samplePoint) {
+  float ballRadius = 1.0;
+  float balls = MAX_DIST;
+  for (int i = 1; i < 1109; i ++) {
+      balls = smin(balls, sphereSDF(samplePoint + pos[i], ballRadius), 0.7);
+  }
+
+  return balls;
+}
+
 
 //------------------------------------------------------------------------------
 
@@ -87,9 +133,9 @@ float3 GetNor( const float3 P )
 
   float3 Result;
 
-  Result.x = GetDis( P + Xd ) - GetDis( P - Xd );
-  Result.y = GetDis( P + Yd ) - GetDis( P - Yd );
-  Result.z = GetDis( P + Zd ) - GetDis( P - Zd );
+  Result.x = sceneSDF( P + Xd ) - sceneSDF( P - Xd );
+  Result.y = sceneSDF( P + Yd ) - sceneSDF( P - Yd );
+  Result.z = sceneSDF( P + Zd ) - sceneSDF( P - Zd );
 
   return normalize( Result );
 }
@@ -114,7 +160,7 @@ bool ObjField( const TRay* Ray,
       Tap->Nor  = GetNor( Tap->Pos );
       Tap->Pos -= D * Tap->Nor;
 
-      return true;  // 交差あり
+      return true;  // 交差あり         F
     }
   }
 
