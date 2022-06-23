@@ -49,11 +49,11 @@ void Raytrace( TRay*  const     Ray,
 
     ///// 物体
 
-    //if ( ObjPlane( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 3 );  // 地面とレイの交差判定
+    // if ( ObjPlane( Ray, &Tap ) ) CheckHit( &Hit, &Tap, 3 );  // 地面とレイの交差判定
 
-    for ( int i = 0; i < 100; i++ )
+    for ( int i = 0; i < 1109; i++ )
     {
-      if ( ObjSpher( Ray, &Tap, Shapers[ i ].Mov ) ) CheckHit( &Hit, &Tap, 1 );  // 球体とレイの交差判定
+      if ( ObjSpher( Ray, &Tap, Shapers[ i ].Mov ) ) CheckHit( &Hit, &Tap, 3 );  // 球体とレイの交差判定
     }
 
     ///// 材質

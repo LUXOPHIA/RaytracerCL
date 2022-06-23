@@ -54,11 +54,11 @@ type
     _Execut  :TCLExecut;
     _Buildr  :TCLBuildr;
     _Kernel  :TCLKernel;
-    _Shapers :TCLBuffer<TShaper>;
+    _Particles :TCLBuffer<TParticle>;
     ///// メソッド
     procedure MakeContext;
     procedure MakeArguments;
-    procedure MakeShapers;
+//    procedure MakeShapers;
     procedure MakePrograms;
   end;
 
@@ -134,36 +134,38 @@ begin
 
      _Samplr := TCLSamplr.Create( _Contex );
 
-     _Shapers := TCLBuffer<TShaper>.Create( _Contex, _Queuer );
+
+     _Camera := TCLBuffer<TSingleM4>.Create( _Contex, _Queuer );
+     _Particles := TCLBuffer<TParticle>.Create( _Contex, _Queuer );
 end;
 
 //------------------------------------------------------------------------------
 
-procedure TForm1.MakeShapers;
-var
-   I :Integer;
-   P :TShaper;
-begin
-     _Shapers.Count := 100;
-
-     _Shapers.Data.Map;
-
-     for I := 0 to _Shapers.Count-1 do
-     begin
-          P.Mov := TSingleM4.Translate( Random + Random + Random + Random - 2,
-                                        Random + Random + Random + Random - 2,
-                                        Random + Random + Random + Random - 2 )
-                 * TSingleM4.RotateY( Random * Pi2 )
-                 * TSingleM4.RotateX( Random * Pi )
-                 * TSingleM4.Scale( Random * 0.16 + 0.02,
-                                    Random * 0.16 + 0.02,
-                                    Random * 0.16 + 0.02 );
-
-          _Shapers.Data[ I ] := P;
-     end;
-
-     _Shapers.Data.Unmap;
-end;
+//procedure TForm1.MakeShapers;
+//var
+//   I :Integer;
+//   P :TShaper;
+//begin
+//     _Shapers.Count := 100;
+//
+//     _Shapers.Data.Map;
+//
+//     for I := 0 to _Shapers.Count-1 do
+//     begin
+//          P.Mov := TSingleM4.Translate( Random + Random + Random + Random - 2,
+//                                        Random + Random + Random + Random - 2,
+//                                        Random + Random + Random + Random - 2 )
+//                 * TSingleM4.RotateY( Random * Pi2 )
+//                 * TSingleM4.RotateX( Random * Pi )
+//                 * TSingleM4.Scale( Random * 0.16 + 0.02,
+//                                    Random * 0.16 + 0.02,
+//                                    Random * 0.16 + 0.02 );
+//
+//          _Shapers.Data[ I ] := P;
+//     end;
+//
+//     _Shapers.Data.Unmap;
+//end;
 
 //------------------------------------------------------------------------------
 
@@ -201,7 +203,7 @@ begin
      _Kernel.Parames['Camera' ] := _Camera ;
      _Kernel.Parames['Textur' ] := _Textur ;
      _Kernel.Parames['Samplr' ] := _Samplr ;
-     _Kernel.Parames['Shapers'] := _Shapers;
+     _Kernel.Parames['Shapers'] := _Particles;
 
      Assert( _Kernel.Parames.FindsOK, '_Kernel.Parames.FindsOK is Error!' );
      Assert( _Kernel.Parames.BindsOK, '_Kernel.Parames.BindsOK is Error!' );
@@ -218,7 +220,7 @@ begin
 
      MakeContext;
      MakeArguments;
-     MakeShapers;
+     LoadPCD( '..\..\_DATA\minion1000.pcd' );
      MakePrograms;
 
      ShowBuild;
