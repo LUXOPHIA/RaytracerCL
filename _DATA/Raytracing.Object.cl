@@ -15,9 +15,9 @@
 // 地面
 
 
-const int MAX_MARCHING_STEPS = 16;
-const float EPSILON = 0.001;
-const float MAX_DIST =
+// const int MAX_MARCHING_STEPS = 16;
+// const float EPSILON = 0.001;
+// const float MAX_DIST =      999999.f;
 
 bool ObjPlane( const TRay* Ray,
                TTap* const Tap )
@@ -83,21 +83,41 @@ float GetDis( const float3 P )
  /**
  * Signed distance function for a sphere centered at the origin with radius r.
  */
-float sphereSDF(float3 p, float r) {
+float SphereSDF(float3 p, float r) {
   return length(p) - r;
 }
 
 // polynomial smooth min (k = 0.1);
-float smin( float a, float b, float k )
+float Smin( float a, float b, float k )
 {
   float h = clamp( 0.5+0.5*(b-a)/k, 0.0, 1.0 );
   return mix( b, a, h ) - k*h*(1.0-h);
 }
 
-float shortestDistanceToSurface(float3 eye, float3 marchingDirection, float start, float end) {
+/**
+ * Signed distance function describing the scene.
+ */
+float SceneSDF(float3 samplePoint, TShaper* spheres) {
+
+  const int MAX_MARCHING_STEPS = 16;
+  const float EPSILON = 0.001;
+  const float MAX_DIST =      999999.f;
+  float ballRadius = 1.0;
+  float balls = MAX_DIST;
+  for (int i = 1; i < 1109; i ++) {
+      balls = Smin(balls, SphereSDF(samplePoint + spheres[i].Mov, ballRadius), 0.7);
+  }
+
+  return balls;
+}
+
+float ShortestDistanceToSurface(float3 eye, float3 marchingDirection, float start, float end, TShaper* spheres) {
+  const int MAX_MARCHING_STEPS = 16;
+  const float EPSILON = 0.001;
+  const float MAX_DIST =      999999.f;
   float depth = start;
   for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
-    float dist = sceneSDF(eye + depth * marchingDirection);
+    float dist = SceneSDF(eye + depth * marchingDirection, spheres);
     if (dist < EPSILON) {
       return depth;
     }
@@ -109,23 +129,11 @@ float shortestDistanceToSurface(float3 eye, float3 marchingDirection, float star
   return end;
 }
 
-/**
- * Signed distance function describing the scene.
- */
-float sceneSDF(float3 samplePoint) {
-  float ballRadius = 1.0;
-  float balls = MAX_DIST;
-  for (int i = 1; i < 1109; i ++) {
-      balls = smin(balls, sphereSDF(samplePoint + pos[i], ballRadius), 0.7);
-  }
-
-  return balls;
-}
 
 
 //------------------------------------------------------------------------------
 
-float3 GetNor( const float3 P )
+float3 GetNor( const float3 P, TShaper* spheres )
 {
   const float3 Xd = { FLOAT_EPS2, 0, 0 };
   const float3 Yd = { 0, FLOAT_EPS2, 0 };
@@ -133,9 +141,9 @@ float3 GetNor( const float3 P )
 
   float3 Result;
 
-  Result.x = sceneSDF( P + Xd ) - sceneSDF( P - Xd );
-  Result.y = sceneSDF( P + Yd ) - sceneSDF( P - Yd );
-  Result.z = sceneSDF( P + Zd ) - sceneSDF( P - Zd );
+  Result.x = SceneSDF( P + Xd, spheres ) - SceneSDF( P - Xd, spheres );
+  Result.y = SceneSDF( P + Yd, spheres ) - SceneSDF( P - Yd, spheres );
+  Result.z = SceneSDF( P + Zd, spheres ) - SceneSDF( P - Zd, spheres );
 
   return normalize( Result );
 }
@@ -144,23 +152,25 @@ float3 GetNor( const float3 P )
 //------------------------------------------------------------------------------
 
 bool ObjField( const TRay* Ray,
-               TTap* const Tap )
+               TTap* const Tap,
+               TShaper* Spheres
+               )
 {
   Tap->Dis = 0;
   for( int i = 0; i < 64; i++ )
   {
     Tap->Pos = Tap->Dis * Ray->Vec + Ray->Pos;
 
-    float D = fabs( GetDis( Tap->Pos ) );
+    float D = fabs( SceneSDF( Tap->Pos, Spheres ) );
 
     Tap->Dis += D;
 
     if ( D < FLOAT_EPS2 )
     {
-      Tap->Nor  = GetNor( Tap->Pos );
+      Tap->Nor  = GetNor( Tap->Pos, Spheres );
       Tap->Pos -= D * Tap->Nor;
 
-      return true;  // 交差あり         F
+      return true;  // 交差あり
     }
   }
 
