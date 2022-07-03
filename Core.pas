@@ -79,7 +79,7 @@ begin
      Assert( F.ReadLine = 'SIZE 4 4 4 4 1' );
      Assert( F.ReadLine = 'TYPE F F F F U' );
      Assert( F.ReadLine = 'COUNT 1 1 1 1 4' );
-     Assert( F.ReadLine = 'WIDTH 1109' );
+     Assert( F.ReadLine = 'WIDTH 39' );
      Assert( F.ReadLine = 'HEIGHT 1' );
      Assert( F.ReadLine = 'VIEWPOINT 0 0 0 1 0 0 0' );
 

@@ -97,21 +97,24 @@ float Smin( float a, float b, float k )
 /**
  * Signed distance function describing the scene.
  */
-float SceneSDF(float3 samplePoint, TShaper* spheres) {
+float SceneSDF(float3 samplePoint, global TShaper* spheres) {
 
   const int MAX_MARCHING_STEPS = 16;
   const float EPSILON = 0.001;
   const float MAX_DIST =      999999.f;
   float ballRadius = 1.0;
   float balls = MAX_DIST;
-  for (int i = 1; i < 1109; i ++) {
-      balls = Smin(balls, SphereSDF(samplePoint + spheres[i].Mov, ballRadius), 0.7);
+  float3 one = { 1, 1, 1 };
+  float3 I = normalize(one);
+
+  for (int i = 1; i < 39; i ++) {
+      balls = Smin(balls, SphereSDF(MulPos(spheres[i].Mov, I) - samplePoint, ballRadius), 0.7);
   }
 
   return balls;
 }
 
-float ShortestDistanceToSurface(float3 eye, float3 marchingDirection, float start, float end, TShaper* spheres) {
+float ShortestDistanceToSurface(float3 eye, float3 marchingDirection, float start, float end, global TShaper* spheres) {
   const int MAX_MARCHING_STEPS = 16;
   const float EPSILON = 0.001;
   const float MAX_DIST =      999999.f;
@@ -133,7 +136,7 @@ float ShortestDistanceToSurface(float3 eye, float3 marchingDirection, float star
 
 //------------------------------------------------------------------------------
 
-float3 GetNor( const float3 P, TShaper* spheres )
+float3 GetNor( const float3 P, global TShaper* spheres )
 {
   const float3 Xd = { FLOAT_EPS2, 0, 0 };
   const float3 Yd = { 0, FLOAT_EPS2, 0 };
@@ -153,7 +156,7 @@ float3 GetNor( const float3 P, TShaper* spheres )
 
 bool ObjField( const TRay* Ray,
                TTap* const Tap,
-               TShaper* Spheres
+               global TShaper* Spheres
                )
 {
   Tap->Dis = 0;
