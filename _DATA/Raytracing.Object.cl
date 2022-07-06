@@ -83,53 +83,33 @@ float GetDis( const float3 P )
  /**
  * Signed distance function for a sphere centered at the origin with radius r.
  */
-float SphereSDF(float3 p, float r) {
-  return length(p) - r;
+float SphereSDF(float3 p, float3 c, float r) {
+  return length(p - c) - r;
 }
 
 // polynomial smooth min (k = 0.1);
 float Smin( float a, float b, float k )
 {
-  float h = clamp( 0.5+0.5*(b-a)/k, 0.0, 1.0 );
-  return mix( b, a, h ) - k*h*(1.0-h);
+  float h = clamp( 0.5f+0.5f*(b-a)/k, 0.f, 1.f );
+  return mix( b, a, h ) - k*h*(1.f-h);
 }
 
 /**
  * Signed distance function describing the scene.
  */
 float SceneSDF(float3 samplePoint, global TShaper* spheres) {
+  float ballRadius = 0.7f;
+  float Result = MAXFLOAT;
 
-  const int MAX_MARCHING_STEPS = 16;
-  const float EPSILON = 0.001;
-  const float MAX_DIST =      999999.f;
-  float ballRadius = 1.0;
-  float balls = MAX_DIST;
-  float3 one = { 1, 1, 1 };
-  float3 I = normalize(one);
-
-  for (int i = 1; i < 39; i ++) {
-      balls = Smin(balls, SphereSDF(MulPos(spheres[i].Mov, I) - samplePoint, ballRadius), 0.7);
+  for (int i = 1; i < 1109; i ++) {
+      TSingleM4 M = spheres[ i ].Mov;
+      float3    C = (float3)( M._14, M._24, M._34 );
+      float     R = M._11;
+      float D = SphereSDF( samplePoint, C, R );
+      Result = Smin(Result, D, 0.1f);
   }
 
-  return balls;
-}
-
-float ShortestDistanceToSurface(float3 eye, float3 marchingDirection, float start, float end, global TShaper* spheres) {
-  const int MAX_MARCHING_STEPS = 16;
-  const float EPSILON = 0.001;
-  const float MAX_DIST =      999999.f;
-  float depth = start;
-  for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
-    float dist = SceneSDF(eye + depth * marchingDirection, spheres);
-    if (dist < EPSILON) {
-      return depth;
-    }
-    depth += dist;
-    if (depth >= end) {
-      return end;
-    }
-  }
-  return end;
+  return Result;
 }
 
 
