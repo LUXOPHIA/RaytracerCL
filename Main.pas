@@ -220,7 +220,7 @@ begin
 
      MakeContext;
      MakeArguments;
-     LoadPCD( '..\..\_DATA\minion39.pcd' );
+     LoadPCD( '..\..\_DATA\minion1000.pcd' );
      MakePrograms;
 
      ShowBuild;
